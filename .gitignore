@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Expo
+app/.expo/
+app/dist/
+
+# React Native
+*.hprof
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+app/ios/
+app/android/
+
+# Backend
+backend/functions/lib/
+backend/.firebase/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+*.tsbuildinfo
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
