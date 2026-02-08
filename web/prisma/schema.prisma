@@ -1,0 +1,84 @@
+// Prisma Schema for Matrimony App
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  BRIDE
+  GROOM
+}
+
+enum UserStatus {
+  PENDING_PROFILE    // Just signed up, needs to complete registration
+  PENDING_PAYMENT    // Profile completed, awaiting payment
+  PENDING_REVIEW     // Payment done, under admin review
+  ACTIVE             // Approved and active
+}
+
+model User {
+  id           String     @id @default(cuid())
+  phoneNumber  String     @unique
+  passwordHash String
+  displayName  String
+  status       UserStatus @default(PENDING_PROFILE)
+  profile      Profile?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Profile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  
+  // Personal Info
+  fullName         String
+  gender           Gender
+  dateOfBirth      DateTime
+  height           String      // e.g., "5'8\""
+  
+  // Professional Info
+  education        String
+  profession       String
+  salary           String?     // Optional
+  
+  // Community Info
+  location         String
+  community        String      // Caste
+  subCaste         String?     // Optional
+  hasHoroscope     Boolean
+  
+  // Contact Info
+  parentContact    String
+  
+  // Photos
+  profilePhoto     String      // URL/path - mandatory
+  additionalPhotos String[]    // Array of URLs/paths
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model PhoneOtp {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique
+  otp         String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model PhoneVerification {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  token       String   @unique
+  expiresAt   DateTime
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}

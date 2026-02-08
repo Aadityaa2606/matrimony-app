@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <!-- Decorative elements around rings -->
+  <!-- Top center floral element -->
+  <g transform="translate(100, 20)">
+    <path d="M0 0 L3 -8 L0 -6 L-3 -8 Z" fill="#C4A35A"/>
+    <ellipse cx="-6" cy="0" rx="4" ry="2" fill="#C4A35A" opacity="0.8"/>
+    <ellipse cx="6" cy="0" rx="4" ry="2" fill="#C4A35A" opacity="0.8"/>
+    <ellipse cx="0" cy="-4" rx="2" ry="4" fill="#C4A35A" opacity="0.6"/>
+  </g>
+  
+  <!-- Left decorative leaf -->
+  <path d="M35 70 Q25 60 30 50 Q32 55 35 52" stroke="#C4A35A" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M30 85 Q20 80 25 70" stroke="#C4A35A" stroke-width="1.5" fill="none" opacity="0.5"/>
+  
+  <!-- Right decorative elements -->
+  <!-- Diamond shape -->
+  <g transform="translate(165, 55)">
+    <path d="M0 -12 L8 0 L0 12 L-8 0 Z" stroke="#C4A35A" stroke-width="1.5" fill="none"/>
+    <path d="M0 -6 L4 0 L0 6 L-4 0 Z" stroke="#C4A35A" stroke-width="1" fill="none" opacity="0.6"/>
+  </g>
+  
+  <!-- Small ring on right -->
+  <circle cx="158" cy="90" r="6" stroke="#C4A35A" stroke-width="1.5" fill="none"/>
+  
+  <!-- Key decorative element on left bottom -->
+  <g transform="translate(25, 110)">
+    <circle cx="0" cy="0" r="5" stroke="#C4A35A" stroke-width="1.5" fill="none"/>
+    <path d="M5 0 L15 0 M12 -3 L12 3" stroke="#C4A35A" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Main interlocking wedding rings -->
+  <!-- Left ring (larger, maroon) -->
+  <g>
+    <!-- Outer ring -->
+    <ellipse cx="75" cy="85" rx="40" ry="42" stroke="#722F37" stroke-width="3" fill="none"/>
+    <!-- Inner ring detail -->
+    <ellipse cx="75" cy="85" rx="32" ry="34" stroke="#722F37" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <!-- Highlight -->
+    <path d="M45 60 Q55 45 80 50" stroke="#C4A35A" stroke-width="2" fill="none" opacity="0.6"/>
+  </g>
+  
+  <!-- Right ring (gold accent) -->
+  <g>
+    <!-- Outer ring -->
+    <ellipse cx="125" cy="85" rx="40" ry="42" stroke="#C4A35A" stroke-width="3" fill="none"/>
+    <!-- Inner ring detail -->
+    <ellipse cx="125" cy="85" rx="32" ry="34" stroke="#C4A35A" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <!-- Small gem/diamond on top -->
+    <g transform="translate(145, 50)">
+      <path d="M0 -5 L4 0 L0 5 L-4 0 Z" stroke="#722F37" stroke-width="1.5" fill="none"/>
+    </g>
+    <!-- Highlight -->
+    <path d="M105 110 Q115 125 140 120" stroke="#722F37" stroke-width="1.5" fill="none" opacity="0.4"/>
+  </g>
+  
+  <!-- Intersection highlight to show interlocking -->
+  <path d="M100 55 Q100 85 100 115" stroke="#722F37" stroke-width="0.5" fill="none" opacity="0.2"/>
+  
+  <!-- Bottom decorative swirls -->
+  <path d="M155 125 Q165 130 170 125 Q172 122 170 118" stroke="#C4A35A" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M45 125 Q35 130 30 125 Q28 122 30 118" stroke="#C4A35A" stroke-width="1.5" fill="none" opacity="0.4"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Decorative crown -->
+  <path d="M50 8 L53 14 L50 12 L47 14 Z" fill="#C4A35A"/>
+  
+  <!-- M and S monogram combined elegantly -->
+  <g stroke="#722F37" stroke-width="2.5" fill="none">
+    <!-- Outer decorative swirl left -->
+    <path d="M25 75 Q18 65 20 50 Q22 35 30 28" stroke-linecap="round"/>
+    <path d="M30 28 Q35 22 42 20" stroke-linecap="round"/>
+    
+    <!-- Outer decorative swirl right -->
+    <path d="M75 75 Q82 65 80 50 Q78 35 70 28" stroke-linecap="round"/>
+    <path d="M70 28 Q65 22 58 20" stroke-linecap="round"/>
+    
+    <!-- M letter forming the center -->
+    <path d="M35 70 L35 35 L50 55 L65 35 L65 70" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- S overlaid -->
+    <path d="M58 35 Q42 32 42 43 Q42 54 58 52 Q74 50 74 62 Q74 74 50 74 Q42 74 38 68" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Small decorative dots in gold -->
+  <circle cx="25" cy="75" r="2" fill="#C4A35A"/>
+  <circle cx="75" cy="75" r="2" fill="#C4A35A"/>
+</svg>
