@@ -42,7 +42,7 @@ export default function DashboardPage() {
                 router.push("/review");
                 break;
               case "ACTIVE":
-                setLoading(false);
+                router.push("/home");
                 break;
             }
           }
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-[var(--muted-foreground)]">Phone</p>
                 <p className="font-medium">
-                  {(session.user as any)?.phone || "Not set"}
+                  {(session.user as { phone?: string })?.phone || "Not set"}
                 </p>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 text-center text-[var(--muted-foreground)] text-sm">
-          <p>🎉 You're all set!</p>
+          <p>🎉 You&apos;re all set!</p>
           <p className="mt-1">Your profile is verified and ready.</p>
         </div>
       </main>

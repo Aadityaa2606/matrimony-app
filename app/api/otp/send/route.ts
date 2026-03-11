@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     if (!phoneNumber || typeof phoneNumber !== "string") {
       return NextResponse.json(
         { error: "Phone number is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!phoneRegex.test(phoneNumber)) {
       return NextResponse.json(
         { error: "Invalid phone number format. Use +91XXXXXXXXXX" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     console.error("Error sending OTP:", error);
     return NextResponse.json(
       { error: "Failed to send OTP. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

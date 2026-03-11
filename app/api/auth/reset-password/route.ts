@@ -9,14 +9,14 @@ export async function POST(request: NextRequest) {
     if (!verificationToken || !newPassword) {
       return NextResponse.json(
         { error: "Verification token and new password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (newPassword.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,21 +28,21 @@ export async function POST(request: NextRequest) {
     if (!verification) {
       return NextResponse.json(
         { error: "Invalid verification token" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (verification.used) {
       return NextResponse.json(
         { error: "This verification has already been used" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     if (new Date() > verification.expiresAt) {
       return NextResponse.json(
         { error: "Verification token has expired" },
-        { status: 410 }
+        { status: 410 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: "No account found with this phone number" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     console.error("Error resetting password:", error);
     return NextResponse.json(
       { error: "Failed to reset password. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

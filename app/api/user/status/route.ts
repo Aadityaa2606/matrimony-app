@@ -25,7 +25,7 @@ export async function GET() {
     console.error("Error fetching user status:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

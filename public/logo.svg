@@ -3,7 +3,7 @@
   <path d="M50 8 L53 14 L50 12 L47 14 Z" fill="#C4A35A"/>
   
   <!-- M and S monogram combined elegantly -->
-  <g stroke="#722F37" stroke-width="2.5" fill="none">
+  <g stroke="#FFFFFF" stroke-width="2.5" fill="none">
     <!-- Outer decorative swirl left -->
     <path d="M25 75 Q18 65 20 50 Q22 35 30 28" stroke-linecap="round"/>
     <path d="M30 28 Q35 22 42 20" stroke-linecap="round"/>

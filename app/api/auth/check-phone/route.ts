@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!phoneNumber) {
       return NextResponse.json(
         { error: "Phone number is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     console.error("Error checking phone:", error);
     return NextResponse.json(
       { error: "Failed to check phone number" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

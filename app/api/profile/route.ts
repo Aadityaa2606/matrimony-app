@@ -28,7 +28,7 @@ export async function GET() {
     console.error("Error fetching profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     if (!["BRIDE", "GROOM"].includes(gender)) {
       return NextResponse.json(
         { error: "Gender must be BRIDE or GROOM" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -126,18 +126,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Update user status to PENDING_PAYMENT
-    await prisma.user.update({
+    // Check if this is a first-time profile creation (user in PENDING_PROFILE status)
+    const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      data: { status: "PENDING_PAYMENT" },
+      select: { status: true },
     });
+
+    // Only update status to PENDING_PAYMENT if creating for the first time
+    if (user?.status === "PENDING_PROFILE") {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { status: "PENDING_PAYMENT" },
+      });
+    }
 
     return NextResponse.json({ success: true, profile });
   } catch (error) {
     console.error("Error saving profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

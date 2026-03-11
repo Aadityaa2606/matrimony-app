@@ -23,7 +23,7 @@ export async function POST() {
     if (user.status !== "PENDING_PAYMENT") {
       return NextResponse.json(
         { error: "Invalid payment state" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST() {
     console.error("Error completing payment:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

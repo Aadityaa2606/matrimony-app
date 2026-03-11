@@ -119,8 +119,11 @@ export default function RegisterPage() {
     return age;
   }, []);
 
-  const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof FormData,
+    value: string | boolean | null | string[],
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }) as FormData);
     setError("");
   };
 
@@ -151,8 +154,8 @@ export default function RegisterPage() {
           additionalPhotos: [...prev.additionalPhotos, data.url].slice(0, 3),
         }));
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to upload photo");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload photo");
     } finally {
       setUploadingPhoto(false);
     }
@@ -235,8 +238,8 @@ export default function RegisterPage() {
       }
 
       router.push("/payment");
-    } catch (err: any) {
-      setError(err.message || "Failed to save profile");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setLoading(false);
     }

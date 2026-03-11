@@ -27,7 +27,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+        const isPasswordValid = await bcrypt.compare(
+          password,
+          user.passwordHash,
+        );
 
         if (!isPasswordValid) {
           return null;
@@ -51,14 +54,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.phone = (user as any).phone;
+        token.phone = (user as { phone?: string }).phone;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as any).phone = token.phone;
+        (session.user as { phone?: unknown }).phone = token.phone;
       }
       return session;
     },

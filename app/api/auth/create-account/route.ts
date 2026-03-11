@@ -8,8 +8,10 @@ export async function POST(request: NextRequest) {
 
     if (!verificationToken || !password || !displayName) {
       return NextResponse.json(
-        { error: "Verification token, password, and display name are required" },
-        { status: 400 }
+        {
+          error: "Verification token, password, and display name are required",
+        },
+        { status: 400 },
       );
     }
 
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,21 +31,21 @@ export async function POST(request: NextRequest) {
     if (!verification) {
       return NextResponse.json(
         { error: "Invalid verification token" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (verification.used) {
       return NextResponse.json(
         { error: "This verification has already been used" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     if (new Date() > verification.expiresAt) {
       return NextResponse.json(
         { error: "Verification token has expired" },
-        { status: 410 }
+        { status: 410 },
       );
     }
 
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "An account with this phone number already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating account:", error);
     return NextResponse.json(
       { error: "Failed to create account. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -82,3 +82,21 @@ model PhoneVerification {
   used        Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, profileId])
+}
+
+model Dismissed {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, profileId])
+}

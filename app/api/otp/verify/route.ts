@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!phoneNumber || !otp) {
       return NextResponse.json(
         { error: "Phone number and OTP are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -19,8 +19,11 @@ export async function POST(request: NextRequest) {
 
     if (!otpRecord) {
       return NextResponse.json(
-        { error: "No OTP found for this phone number. Please request a new one." },
-        { status: 404 }
+        {
+          error:
+            "No OTP found for this phone number. Please request a new one.",
+        },
+        { status: 404 },
       );
     }
 
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
       await prisma.phoneOtp.delete({ where: { phoneNumber } });
       return NextResponse.json(
         { error: "OTP has expired. Please request a new one." },
-        { status: 410 }
+        { status: 410 },
       );
     }
 
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
       await prisma.phoneOtp.delete({ where: { phoneNumber } });
       return NextResponse.json(
         { error: "Too many failed attempts. Please request a new OTP." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: "Invalid OTP. Please try again." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
     console.error("Error verifying OTP:", error);
     return NextResponse.json(
       { error: "Failed to verify OTP. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

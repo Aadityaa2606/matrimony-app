@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
 type Step = "phone" | "otp";
 
-export default function VerifyPhonePage() {
+function VerifyPhoneContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get("mode"); // "reset" for password reset flow
@@ -80,8 +80,8 @@ export default function VerifyPhonePage() {
 
       setStep("otp");
       setCountdown(60);
-    } catch (err: any) {
-      setError(err.message || "Failed to send OTP");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -160,8 +160,8 @@ export default function VerifyPhonePage() {
         // New user, go to set password
         router.push("/set-password");
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to verify OTP");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to verify OTP");
     } finally {
       setLoading(false);
     }
@@ -222,7 +222,7 @@ export default function VerifyPhonePage() {
               </p>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">
+                <label className="block text-sm font-medium mb-2 text-foreground">
                   Phone Number
                 </label>
                 <input
@@ -236,7 +236,7 @@ export default function VerifyPhonePage() {
               </div>
 
               {error && (
-                <p className="text-[var(--error)] text-sm mb-4 flex items-center gap-2">
+                <p className="text-error text-sm mb-4 flex items-center gap-2">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -299,7 +299,7 @@ export default function VerifyPhonePage() {
               </div>
 
               {error && (
-                <p className="text-[var(--error)] text-sm text-center mb-4 flex items-center justify-center gap-2">
+                <p className="text-error text-sm text-center mb-4 flex items-center justify-center gap-2">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -326,14 +326,14 @@ export default function VerifyPhonePage() {
               </button>
 
               <button
-                className="w-full text-center text-[var(--muted-foreground)] disabled:opacity-50 hover:text-[var(--foreground)] transition-colors"
+                className="w-full text-center text-muted-foreground disabled:opacity-50 hover:text-foreground transition-colors"
                 onClick={handleResendOtp}
                 disabled={countdown > 0}
               >
                 {countdown > 0 ? (
                   `Resend OTP in ${countdown}s`
                 ) : (
-                  <span className="text-[var(--primary)]">Resend OTP</span>
+                  <span className="text-primary">Resend OTP</span>
                 )}
               </button>
             </>
@@ -341,5 +341,19 @@ export default function VerifyPhonePage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function VerifyPhonePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <span className="spinner w-8 h-8 border-primary" />
+        </div>
+      }
+    >
+      <VerifyPhoneContent />
+    </Suspense>
   );
 }

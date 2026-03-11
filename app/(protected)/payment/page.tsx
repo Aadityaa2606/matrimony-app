@@ -38,8 +38,12 @@ export default function PaymentPage() {
       }
 
       router.push("/review");
-    } catch (err: any) {
-      setError(err.message || "Payment failed. Please try again.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Payment failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
