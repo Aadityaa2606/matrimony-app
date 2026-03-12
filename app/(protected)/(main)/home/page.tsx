@@ -95,8 +95,8 @@ export default function HomePage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -106,7 +106,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-gradient-hero text-white p-6 pb-8 rounded-b-3xl shadow-lg">
         <div className="flex items-center justify-between max-w-2xl mx-auto">
@@ -129,19 +129,19 @@ export default function HomePage() {
       {/* Profile Cards */}
       <main className="p-4 pt-6 max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="heading-secondary text-lg text-[var(--primary)]">
+          <h2 className="heading-secondary text-lg text-primary">
             Find Your Match
           </h2>
-          <span className="text-sm text-[var(--muted-foreground)]">
+          <span className="text-sm text-muted-foreground">
             {profiles.length} profiles
           </span>
         </div>
 
         {profiles.length === 0 ? (
           <div className="card text-center py-12 animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--muted)] rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
               <svg
-                className="w-8 h-8 text-[var(--muted-foreground)]"
+                className="w-8 h-8 text-muted-foreground"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -154,10 +154,10 @@ export default function HomePage() {
                 />
               </svg>
             </div>
-            <h3 className="heading-secondary text-lg text-[var(--foreground)] mb-2">
+            <h3 className="heading-secondary text-lg text-foreground mb-2">
               No More Profiles
             </h3>
-            <p className="text-[var(--muted-foreground)]">
+            <p className="text-muted-foreground">
               You&apos;ve seen all available profiles. Check back later for new
               matches!
             </p>
@@ -175,7 +175,7 @@ export default function HomePage() {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Profile Photo - Larger with gradient overlay */}
-                  <div className="relative aspect-[4/5]">
+                  <div className="relative aspect-4/5">
                     <Image
                       src={profile.profilePhoto}
                       alt={profile.fullName}
@@ -183,18 +183,18 @@ export default function HomePage() {
                       className="object-cover"
                     />
                     {/* Gradient overlay for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                     {/* Verified badge */}
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
                       <svg
-                        className="w-4 h-4 text-[var(--success)]"
+                        className="w-4 h-4 text-success"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-xs font-semibold text-[var(--foreground)]">
+                      <span className="text-xs font-semibold text-foreground">
                         Verified
                       </span>
                     </div>
@@ -282,7 +282,7 @@ export default function HomePage() {
                     <button
                       onClick={(e) => handleDismiss(e, profile.id)}
                       disabled={actionLoading === profile.id}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--error)] hover:text-[var(--error)] hover:bg-[var(--error)]/5 transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-border text-muted-foreground hover:border-error hover:text-error hover:bg-(--error)/5 transition-all font-medium"
                     >
                       {actionLoading === profile.id ? (
                         <span className="spinner w-5 h-5" />
@@ -308,7 +308,7 @@ export default function HomePage() {
                     <button
                       onClick={(e) => handleLike(e, profile.id)}
                       disabled={actionLoading === profile.id}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] text-white hover:shadow-lg hover:shadow-[var(--primary)]/30 transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-linear-to-r from-primary to-primary-light text-white hover:shadow-lg hover:shadow-(--primary)/30 transition-all font-medium"
                     >
                       {actionLoading === profile.id ? (
                         <span className="spinner w-5 h-5" />

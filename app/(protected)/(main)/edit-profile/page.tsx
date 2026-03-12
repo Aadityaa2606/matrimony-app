@@ -291,8 +291,8 @@ export default function EditProfilePage() {
 
   if (status === "loading" || fetchingProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -309,21 +309,21 @@ export default function EditProfilePage() {
             key={step}
             className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
               step <= currentStep
-                ? "bg-[var(--primary)] text-white"
-                : "bg-[var(--muted)] text-[var(--muted-foreground)]"
+                ? "bg-primary text-white"
+                : "bg-muted text-muted-foreground"
             }`}
           >
             {step}
           </div>
         ))}
       </div>
-      <div className="h-2 bg-[var(--muted)] rounded-full overflow-hidden">
+      <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
-          className="h-full bg-[var(--primary)] transition-all duration-300"
+          className="h-full bg-primary transition-all duration-300"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         />
       </div>
-      <div className="flex justify-between mt-2 text-xs text-[var(--muted-foreground)]">
+      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
         <span>Personal</span>
         <span>Professional</span>
         <span>Community</span>
@@ -334,7 +334,7 @@ export default function EditProfilePage() {
 
   const renderStep1 = () => (
     <div className="space-y-4 animate-fade-in">
-      <h2 className="heading-secondary text-xl text-[var(--primary)] mb-4">
+      <h2 className="heading-secondary text-xl text-primary mb-4">
         Personal Information
       </h2>
 
@@ -358,8 +358,8 @@ export default function EditProfilePage() {
               type="button"
               className={`p-4 rounded-xl border-2 transition-all ${
                 formData.gender === gender
-                  ? "border-[var(--primary)] bg-[var(--primary)]/10"
-                  : "border-[var(--border)] hover:border-[var(--primary)]/50"
+                  ? "border-primary bg-(--primary)/10"
+                  : "border-border hover:border-(--primary)/50"
               }`}
               onClick={() => handleInputChange("gender", gender)}
             >
@@ -390,7 +390,7 @@ export default function EditProfilePage() {
           }
         />
         {formData.dateOfBirth && (
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Age: {calculateAge(formData.dateOfBirth)} years
           </p>
         )}
@@ -416,7 +416,7 @@ export default function EditProfilePage() {
 
   const renderStep2 = () => (
     <div className="space-y-4 animate-fade-in">
-      <h2 className="heading-secondary text-xl text-[var(--primary)] mb-4">
+      <h2 className="heading-secondary text-xl text-primary mb-4">
         Professional Information
       </h2>
 
@@ -450,7 +450,7 @@ export default function EditProfilePage() {
       <div>
         <label className="block text-sm font-medium mb-2">
           Annual Salary{" "}
-          <span className="text-[var(--muted-foreground)]">(Optional)</span>
+          <span className="text-muted-foreground">(Optional)</span>
         </label>
         <input
           type="text"
@@ -465,7 +465,7 @@ export default function EditProfilePage() {
 
   const renderStep3 = () => (
     <div className="space-y-4 animate-fade-in">
-      <h2 className="heading-secondary text-xl text-[var(--primary)] mb-4">
+      <h2 className="heading-secondary text-xl text-primary mb-4">
         Community & Contact
       </h2>
 
@@ -496,7 +496,7 @@ export default function EditProfilePage() {
       <div>
         <label className="block text-sm font-medium mb-2">
           Sub-caste{" "}
-          <span className="text-[var(--muted-foreground)]">(Optional)</span>
+          <span className="text-muted-foreground">(Optional)</span>
         </label>
         <input
           type="text"
@@ -518,8 +518,8 @@ export default function EditProfilePage() {
               type="button"
               className={`p-3 rounded-xl border-2 transition-all ${
                 formData.hasHoroscope === value
-                  ? "border-[var(--primary)] bg-[var(--primary)]/10"
-                  : "border-[var(--border)] hover:border-[var(--primary)]/50"
+                  ? "border-primary bg-(--primary)/10"
+                  : "border-border hover:border-(--primary)/50"
               }`}
               onClick={() => handleInputChange("hasHoroscope", value)}
             >
@@ -546,7 +546,7 @@ export default function EditProfilePage() {
 
   const renderStep4 = () => (
     <div className="space-y-4 animate-fade-in">
-      <h2 className="heading-secondary text-xl text-[var(--primary)] mb-4">
+      <h2 className="heading-secondary text-xl text-primary mb-4">
         Profile Photos
       </h2>
 
@@ -554,7 +554,7 @@ export default function EditProfilePage() {
         <label className="block text-sm font-medium mb-2">
           Profile Photo *
         </label>
-        <p className="text-sm text-[var(--muted-foreground)] mb-3">
+        <p className="text-sm text-muted-foreground mb-3">
           This will be your main profile picture
         </p>
 
@@ -568,14 +568,14 @@ export default function EditProfilePage() {
             />
             <button
               type="button"
-              className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--error)] text-white rounded-full flex items-center justify-center"
+              className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center"
               onClick={() => handleInputChange("profilePhoto", "")}
             >
               ×
             </button>
           </div>
         ) : (
-          <label className="block w-32 h-32 mx-auto border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--primary)] transition-colors">
+          <label className="block w-32 h-32 mx-auto border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary transition-colors">
             <input
               type="file"
               className="hidden"
@@ -586,7 +586,7 @@ export default function EditProfilePage() {
               }}
               disabled={uploadingPhoto}
             />
-            <div className="w-full h-full flex flex-col items-center justify-center text-[var(--muted-foreground)]">
+            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
               {uploadingPhoto ? (
                 <span className="spinner" />
               ) : (
@@ -615,9 +615,9 @@ export default function EditProfilePage() {
       <div>
         <label className="block text-sm font-medium mb-2">
           Additional Photos{" "}
-          <span className="text-[var(--muted-foreground)]">(Up to 3)</span>
+          <span className="text-muted-foreground">(Up to 3)</span>
         </label>
-        <p className="text-sm text-[var(--muted-foreground)] mb-3">
+        <p className="text-sm text-muted-foreground mb-3">
           Add more photos to make your profile stand out
         </p>
 
@@ -632,7 +632,7 @@ export default function EditProfilePage() {
               />
               <button
                 type="button"
-                className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--error)] text-white rounded-full flex items-center justify-center"
+                className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center"
                 onClick={() => removeAdditionalPhoto(index)}
               >
                 ×
@@ -641,7 +641,7 @@ export default function EditProfilePage() {
           ))}
 
           {formData.additionalPhotos.length < 3 && (
-            <label className="aspect-square border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:border-[var(--primary)] transition-colors">
+            <label className="aspect-square border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary transition-colors">
               <input
                 type="file"
                 className="hidden"
@@ -652,7 +652,7 @@ export default function EditProfilePage() {
                 }}
                 disabled={uploadingPhoto}
               />
-              <div className="w-full h-full flex flex-col items-center justify-center text-[var(--muted-foreground)]">
+              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
                 {uploadingPhoto ? (
                   <span className="spinner" />
                 ) : (
@@ -679,17 +679,17 @@ export default function EditProfilePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <button
           onClick={
             currentStep > 1 ? handleBack : () => router.push("/settings")
           }
-          className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center hover:bg-[var(--border)] transition-colors"
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[var(--foreground)]"
+            className="w-5 h-5 text-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -708,7 +708,7 @@ export default function EditProfilePage() {
 
       {/* Content */}
       <main className="px-6 py-4 max-w-md mx-auto">
-        <h1 className="heading-primary text-2xl text-[var(--primary)] mb-2">
+        <h1 className="heading-primary text-2xl text-primary mb-2">
           Edit Your Profile
         </h1>
         <p className="subtitle mb-6">
@@ -724,7 +724,7 @@ export default function EditProfilePage() {
           {currentStep === 4 && renderStep4()}
 
           {error && (
-            <p className="text-[var(--error)] text-sm mt-4 flex items-center gap-2">
+            <p className="text-error text-sm mt-4 flex items-center gap-2">
               <svg
                 className="w-4 h-4"
                 fill="none"

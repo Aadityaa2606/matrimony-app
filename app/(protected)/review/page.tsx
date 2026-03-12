@@ -28,7 +28,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="p-4 flex items-center justify-center">
         <Image src="/logo.svg" alt="Logo" width={48} height={48} />
@@ -39,9 +39,9 @@ export default function ReviewPage() {
         <div className="card w-full animate-fade-in text-center">
           {/* Success Animation */}
           <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 bg-[var(--success)]/20 rounded-full animate-pulse-ring" />
-            <div className="absolute inset-2 bg-[var(--success)]/30 rounded-full" />
-            <div className="absolute inset-4 bg-[var(--success)] rounded-full flex items-center justify-center">
+            <div className="absolute inset-0 bg-(--success)/20 rounded-full animate-pulse-ring" />
+            <div className="absolute inset-2 bg-(--success)/30 rounded-full" />
+            <div className="absolute inset-4 bg-success rounded-full flex items-center justify-center">
               <svg
                 className="w-8 h-8 text-white"
                 fill="none"
@@ -58,13 +58,13 @@ export default function ReviewPage() {
             </div>
           </div>
 
-          <h1 className="heading-primary text-2xl text-[var(--primary)] mb-2">
+          <h1 className="heading-primary text-2xl text-primary mb-2">
             Payment Successful!
           </h1>
 
           <div className="elegant-divider my-4" />
 
-          <h2 className="heading-secondary text-xl text-[var(--foreground)] mb-2">
+          <h2 className="heading-secondary text-xl text-foreground mb-2">
             Profile Under Review
           </h2>
           <p className="subtitle mb-6">
@@ -73,14 +73,14 @@ export default function ReviewPage() {
           </p>
 
           {/* Status Card */}
-          <div className="bg-[var(--muted)] rounded-xl p-6 mb-6">
+          <div className="bg-muted rounded-xl p-6 mb-6">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-3 h-3 bg-[var(--accent)] rounded-full animate-pulse" />
-              <span className="font-medium text-[var(--foreground)]">
+              <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
+              <span className="font-medium text-foreground">
                 Review in Progress
               </span>
             </div>
-            <div className="space-y-2 text-sm text-[var(--muted-foreground)]">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
@@ -118,31 +118,31 @@ export default function ReviewPage() {
 
           {/* What's Next */}
           <div className="text-left mb-6">
-            <h3 className="font-medium text-[var(--foreground)] mb-3">
+            <h3 className="font-medium text-foreground mb-3">
               What happens next?
             </h3>
             <ol className="space-y-3 text-sm">
               <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center flex-shrink-0 font-medium">
+                <span className="w-6 h-6 rounded-full bg-(--primary)/10 text-primary flex items-center justify-center shrink-0 font-medium">
                   1
                 </span>
-                <span className="text-[var(--muted-foreground)]">
+                <span className="text-muted-foreground">
                   Our team verifies your profile details
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center flex-shrink-0 font-medium">
+                <span className="w-6 h-6 rounded-full bg-(--primary)/10 text-primary flex items-center justify-center shrink-0 font-medium">
                   2
                 </span>
-                <span className="text-[var(--muted-foreground)]">
+                <span className="text-muted-foreground">
                   Your profile becomes visible to other members
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center flex-shrink-0 font-medium">
+                <span className="w-6 h-6 rounded-full bg-(--primary)/10 text-primary flex items-center justify-center shrink-0 font-medium">
                   3
                 </span>
-                <span className="text-[var(--muted-foreground)]">
+                <span className="text-muted-foreground">
                   Start connecting with matches!
                 </span>
               </li>
@@ -157,7 +157,7 @@ export default function ReviewPage() {
           </button>
         </div>
 
-        <p className="text-xs text-[var(--muted-foreground)] mt-6 text-center">
+        <p className="text-xs text-muted-foreground mt-6 text-center">
           Questions? Contact us at support@matrimony.com
         </p>
       </main>

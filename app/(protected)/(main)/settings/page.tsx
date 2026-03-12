@@ -49,8 +49,8 @@ export default function SettingsPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-gradient-hero text-white p-6 pb-8 rounded-b-3xl shadow-lg">
         <div className="max-w-2xl mx-auto">
@@ -75,7 +75,7 @@ export default function SettingsPage() {
         {/* Profile Card */}
         <div className="card animate-fade-in mb-4">
           <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden border-3 border-[var(--accent)] flex-shrink-0">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden border-3 border-accent shrink-0">
               {profile?.profilePhoto ? (
                 <Image
                   src={profile.profilePhoto}
@@ -84,9 +84,9 @@ export default function SettingsPage() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-[var(--primary)]/10 flex items-center justify-center">
+                <div className="w-full h-full bg-(--primary)/10 flex items-center justify-center">
                   <svg
-                    className="w-10 h-10 text-[var(--primary)]"
+                    className="w-10 h-10 text-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -102,15 +102,15 @@ export default function SettingsPage() {
               )}
             </div>
             <div className="flex-1">
-              <h2 className="heading-secondary text-xl text-[var(--foreground)]">
+              <h2 className="heading-secondary text-xl text-foreground">
                 {profile?.fullName || session.user?.name || "User"}
               </h2>
               {profile && (
-                <p className="text-sm text-[var(--muted-foreground)]">
+                <p className="text-sm text-muted-foreground">
                   {profile.location} • {profile.community}
                 </p>
               )}
-              <p className="text-sm text-[var(--success)] mt-1 flex items-center gap-1">
+              <p className="text-sm text-success mt-1 flex items-center gap-1">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -213,7 +213,7 @@ export default function SettingsPage() {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="btn btn-outline w-full mt-6 text-[var(--error)] border-[var(--error)] hover:bg-[var(--error)]/10"
+          className="btn btn-outline w-full mt-6 text-error border-error hover:bg-(--error)/10"
         >
           <svg
             className="w-5 h-5"
@@ -231,7 +231,7 @@ export default function SettingsPage() {
           Sign Out
         </button>
 
-        <p className="text-center text-xs text-[var(--muted-foreground)] mt-6">
+        <p className="text-center text-xs text-muted-foreground mt-6">
           App Version 1.0.0
         </p>
       </main>
@@ -253,19 +253,19 @@ function MenuItem({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 hover:bg-[var(--muted)] transition-colors border-b border-[var(--border)] last:border-0"
+      className="w-full flex items-center gap-4 p-4 hover:bg-muted transition-colors border-b border-border last:border-0"
     >
-      <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)]">
+      <div className="w-10 h-10 rounded-full bg-(--primary)/10 flex items-center justify-center text-primary">
         {icon}
       </div>
       <span className="flex-1 text-left font-medium">{label}</span>
       {badge && (
-        <span className="text-xs px-2 py-1 bg-[var(--accent)]/20 text-[var(--accent)] rounded-full">
+        <span className="text-xs px-2 py-1 bg-(--accent)/20 text-accent rounded-full">
           {badge}
         </span>
       )}
       <svg
-        className="w-5 h-5 text-[var(--muted-foreground)]"
+        className="w-5 h-5 text-muted-foreground"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

@@ -74,8 +74,8 @@ export default function FavoritesPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-gradient-hero text-white p-6 pb-8 rounded-b-3xl shadow-lg">
         <div className="max-w-2xl mx-auto">
@@ -100,9 +100,9 @@ export default function FavoritesPage() {
       <main className="p-4 pt-10 max-w-2xl mx-auto -mt-4">
         {favorites.length === 0 ? (
           <div className="card text-center py-12 animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--primary)]/10 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-(--primary)/10 rounded-full flex items-center justify-center">
               <svg
-                className="w-8 h-8 text-[var(--primary)]"
+                className="w-8 h-8 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -115,10 +115,10 @@ export default function FavoritesPage() {
                 />
               </svg>
             </div>
-            <h3 className="heading-secondary text-lg text-[var(--foreground)] mb-2">
+            <h3 className="heading-secondary text-lg text-foreground mb-2">
               No Favorites Yet
             </h3>
-            <p className="text-[var(--muted-foreground)] mb-4">
+            <p className="text-muted-foreground mb-4">
               Start exploring profiles and like the ones you&apos;re interested
               in!
             </p>
@@ -129,7 +129,7 @@ export default function FavoritesPage() {
         ) : (
           <div className="grid gap-5">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-[var(--muted-foreground)]">
+              <span className="text-sm text-muted-foreground">
                 {favorites.length} favorite{favorites.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -145,7 +145,7 @@ export default function FavoritesPage() {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Profile Photo with gradient overlay */}
-                  <div className="relative aspect-[4/5]">
+                  <div className="relative aspect-4/5">
                     <Image
                       src={profile.profilePhoto}
                       alt={profile.fullName}
@@ -153,10 +153,10 @@ export default function FavoritesPage() {
                       className="object-cover"
                     />
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                     {/* Liked badge */}
-                    <div className="absolute top-4 right-4 bg-[var(--primary)] px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+                    <div className="absolute top-4 right-4 bg-primary px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
                       <svg
                         className="w-4 h-4 text-white"
                         fill="currentColor"
@@ -248,7 +248,7 @@ export default function FavoritesPage() {
                     <button
                       onClick={(e) => handleRemove(e, profile.id)}
                       disabled={removeLoading === profile.id}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--error)] hover:text-[var(--error)] hover:bg-[var(--error)]/5 transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-border text-muted-foreground hover:border-error hover:text-error hover:bg-(--error)/5 transition-all font-medium"
                     >
                       {removeLoading === profile.id ? (
                         <span className="spinner w-5 h-5" />
@@ -274,7 +274,7 @@ export default function FavoritesPage() {
                     <Link
                       href={`/profile/${profile.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] text-white hover:shadow-lg hover:shadow-[var(--primary)]/30 transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-linear-to-r from-primary to-primary-light text-white hover:shadow-lg hover:shadow-(--primary)/30 transition-all font-medium"
                     >
                       <svg
                         className="w-5 h-5"

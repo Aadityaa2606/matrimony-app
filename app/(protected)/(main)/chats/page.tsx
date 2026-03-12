@@ -194,16 +194,16 @@ function ChannelPreview({
           <h3 className="font-semibold text-foreground truncate">
             {(otherUser?.name as string) || "Unknown User"}
           </h3>
-          <span className="text-xs text-[var(--muted-foreground)] flex-shrink-0 ml-2">
+          <span className="text-xs text-muted-foreground shrink-0 ml-2">
             {formatTime(lastMessage?.created_at)}
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-[var(--muted-foreground)] truncate">
+          <p className="text-sm text-muted-foreground truncate">
             {lastMessage?.text || "No messages yet"}
           </p>
           {unreadCount > 0 && (
-            <span className="flex-shrink-0 ml-2 w-5 h-5 bg-[var(--primary)] rounded-full flex items-center justify-center text-white text-xs font-bold">
+            <span className="shrink-0 ml-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
               {unreadCount}
             </span>
           )}

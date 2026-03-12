@@ -55,8 +55,8 @@ export default function DashboardPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -66,9 +66,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[var(--primary)] text-white p-6">
+      <header className="bg-primary text-white p-6">
         <div className="flex items-center justify-between max-w-2xl mx-auto">
           <div>
             <p className="text-white/80 text-sm">Welcome back,</p>
@@ -106,15 +106,15 @@ export default function DashboardPage() {
       {/* Content */}
       <main className="p-6 max-w-2xl mx-auto">
         <div className="card animate-fade-in">
-          <h2 className="heading-secondary text-xl text-[var(--primary)] mb-4">
+          <h2 className="heading-secondary text-xl text-primary mb-4">
             Your Profile
           </h2>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-[var(--muted)] rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center">
+            <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--primary)]"
+                  className="w-5 h-5 text-primary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -128,17 +128,17 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-[var(--muted-foreground)]">Phone</p>
+                <p className="text-sm text-muted-foreground">Phone</p>
                 <p className="font-medium">
                   {(session.user as { phone?: string })?.phone || "Not set"}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-4 bg-[var(--muted)] rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-[var(--success)]/10 flex items-center justify-center">
+            <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--success)]"
+                  className="w-5 h-5 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -152,8 +152,8 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-[var(--muted-foreground)]">Status</p>
-                <p className="font-medium text-[var(--success)]">Active</p>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="font-medium text-success">Active</p>
               </div>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="mt-6 text-center text-[var(--muted-foreground)] text-sm">
+        <div className="mt-6 text-center text-muted-foreground text-sm">
           <p>🎉 You&apos;re all set!</p>
           <p className="mt-1">Your profile is verified and ready.</p>
         </div>

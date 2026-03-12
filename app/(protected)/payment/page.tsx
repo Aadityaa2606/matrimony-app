@@ -51,8 +51,8 @@ export default function PaymentPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -62,15 +62,15 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <button
           onClick={() => router.push("/register")}
-          className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center hover:bg-[var(--border)] transition-colors"
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[var(--foreground)]"
+            className="w-5 h-5 text-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -91,9 +91,9 @@ export default function PaymentPage() {
       <main className="flex-1 px-6 py-8 flex flex-col items-center justify-center max-w-md mx-auto w-full">
         <div className="card w-full animate-fade-in text-center">
           {/* Icon */}
-          <div className="w-20 h-20 mx-auto mb-6 bg-[var(--accent)]/20 rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-accent/20 rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-[var(--accent)]"
+              className="w-10 h-10 text-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -107,7 +107,7 @@ export default function PaymentPage() {
             </svg>
           </div>
 
-          <h1 className="heading-primary text-2xl text-[var(--primary)] mb-2">
+          <h1 className="heading-primary text-2xl text-primary mb-2">
             Complete Your Registration
           </h1>
           <p className="subtitle mb-6">
@@ -115,24 +115,24 @@ export default function PaymentPage() {
           </p>
 
           {/* Price Card */}
-          <div className="bg-[var(--muted)] rounded-xl p-6 mb-6">
-            <p className="text-sm text-[var(--muted-foreground)] mb-1">
+          <div className="bg-muted rounded-xl p-6 mb-6">
+            <p className="text-sm text-muted-foreground mb-1">
               Registration Fee
             </p>
             <div className="flex items-baseline justify-center gap-1">
-              <span className="text-4xl font-serif font-bold text-[var(--primary)]">
+              <span className="text-4xl font-serif font-bold text-primary">
                 ₹500
               </span>
-              <span className="text-[var(--muted-foreground)]">/one-time</span>
+              <span className="text-muted-foreground">/one-time</span>
             </div>
           </div>
 
           {/* Features */}
           <div className="text-left space-y-3 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[var(--success)]/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0">
                 <svg
-                  className="w-4 h-4 text-[var(--success)]"
+                  className="w-4 h-4 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -150,9 +150,9 @@ export default function PaymentPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[var(--success)]/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0">
                 <svg
-                  className="w-4 h-4 text-[var(--success)]"
+                  className="w-4 h-4 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -170,9 +170,9 @@ export default function PaymentPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[var(--success)]/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0">
                 <svg
-                  className="w-4 h-4 text-[var(--success)]"
+                  className="w-4 h-4 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -188,9 +188,9 @@ export default function PaymentPage() {
               <span className="text-sm">Access to premium matches</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[var(--success)]/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0">
                 <svg
-                  className="w-4 h-4 text-[var(--success)]"
+                  className="w-4 h-4 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -208,7 +208,7 @@ export default function PaymentPage() {
           </div>
 
           {error && (
-            <p className="text-[var(--error)] text-sm mb-4 flex items-center justify-center gap-2">
+            <p className="text-error text-sm mb-4 flex items-center justify-center gap-2">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -241,7 +241,7 @@ export default function PaymentPage() {
             )}
           </button>
 
-          <p className="text-xs text-[var(--muted-foreground)] mt-4">
+          <p className="text-xs text-muted-foreground mt-4">
             🔒 Secure payment powered by Razorpay
           </p>
         </div>

@@ -97,8 +97,8 @@ export default function ProfileDetailPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <span className="spinner w-8 h-8 border-[var(--primary)]" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function ProfileDetailPage() {
   const allPhotos = [profile.profilePhoto, ...profile.additionalPhotos];
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       {/* Header with Back Button */}
       <header className="fixed top-0 left-0 right-0 z-10 p-4 flex items-center justify-between">
         <button
@@ -118,7 +118,7 @@ export default function ProfileDetailPage() {
           className="w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[var(--foreground)]"
+            className="w-5 h-5 text-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -136,8 +136,8 @@ export default function ProfileDetailPage() {
           disabled={actionLoading}
           className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all ${
             isFavorite
-              ? "bg-[var(--primary)] text-white"
-              : "bg-white/90 text-[var(--muted-foreground)] hover:text-[var(--primary)]"
+              ? "bg-primary text-white"
+              : "bg-white/90 text-muted-foreground hover:text-primary"
           }`}
         >
           {actionLoading ? (
@@ -252,7 +252,7 @@ export default function ProfileDetailPage() {
 
           {/* Personal Details */}
           <section className="mb-6">
-            <h2 className="heading-secondary text-lg text-[var(--primary)] mb-4 flex items-center gap-2">
+            <h2 className="heading-secondary text-lg text-primary mb-4 flex items-center gap-2">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -283,7 +283,7 @@ export default function ProfileDetailPage() {
 
           {/* Professional Details */}
           <section className="mb-6">
-            <h2 className="heading-secondary text-lg text-[var(--primary)] mb-4 flex items-center gap-2">
+            <h2 className="heading-secondary text-lg text-primary mb-4 flex items-center gap-2">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -310,7 +310,7 @@ export default function ProfileDetailPage() {
 
           {/* Contact Details */}
           <section>
-            <h2 className="heading-secondary text-lg text-[var(--primary)] mb-4 flex items-center gap-2">
+            <h2 className="heading-secondary text-lg text-primary mb-4 flex items-center gap-2">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -326,8 +326,8 @@ export default function ProfileDetailPage() {
               </svg>
               Contact Information
             </h2>
-            <div className="p-4 bg-[var(--muted)] rounded-xl">
-              <p className="text-sm text-[var(--muted-foreground)]">
+            <div className="p-4 bg-muted rounded-xl">
+              <p className="text-sm text-muted-foreground">
                 Parent Contact
               </p>
               <p className="font-medium text-lg">{profile.parentContact}</p>
@@ -336,7 +336,7 @@ export default function ProfileDetailPage() {
 
           {/* Message Button */}
           {profile.userId !== session?.user?.id && (
-            <div className="mt-8 pt-6 border-t border-[var(--border)]">
+            <div className="mt-8 pt-6 border-t border-border">
               <button
                 onClick={async () => {
                   if (!session?.user?.id || !profile) return;
@@ -388,8 +388,8 @@ export default function ProfileDetailPage() {
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-3 bg-[var(--muted)] rounded-xl">
-      <p className="text-xs text-[var(--muted-foreground)]">{label}</p>
+    <div className="p-3 bg-muted rounded-xl">
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
     </div>
   );

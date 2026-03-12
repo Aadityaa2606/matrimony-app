@@ -75,15 +75,15 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)]">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <Link
           href="/welcome"
-          className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center hover:bg-[var(--border)] transition-colors"
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[var(--foreground)]"
+            className="w-5 h-5 text-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -103,26 +103,26 @@ function SignInContent() {
       {/* Content */}
       <main className="flex-1 px-6 py-8">
         <div className="animate-fade-in max-w-md mx-auto">
-          <h1 className="heading-primary text-3xl text-[var(--primary)] mb-2">
+          <h1 className="heading-primary text-3xl text-primary mb-2">
             Welcome Back
           </h1>
           <p className="subtitle mb-8">Sign in to continue your journey</p>
 
           {verified && (
-            <div className="bg-[var(--success)]/10 text-[var(--success)] p-4 rounded-xl mb-6 border border-[var(--success)]/20">
+            <div className="bg-(--success)/10 text-success p-4 rounded-xl mb-6 border border-(--success)/20">
               ✓ Phone verified! Please sign in with your password.
             </div>
           )}
 
           {created && (
-            <div className="bg-[var(--success)]/10 text-[var(--success)] p-4 rounded-xl mb-6 border border-[var(--success)]/20">
+            <div className="bg-(--success)/10 text-success p-4 rounded-xl mb-6 border border-(--success)/20">
               ✓ Account created! Please sign in.
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">
+              <label className="block text-sm font-medium mb-2 text-foreground">
                 Phone Number
               </label>
               <input
@@ -136,7 +136,7 @@ function SignInContent() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">
+              <label className="block text-sm font-medium mb-2 text-foreground">
                 Password
               </label>
               <div className="relative">
@@ -152,7 +152,7 @@ function SignInContent() {
                 />
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -195,7 +195,7 @@ function SignInContent() {
             </div>
 
             {error && (
-              <p className="text-[var(--error)] text-sm mb-4 flex items-center gap-2">
+              <p className="text-error text-sm mb-4 flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -223,19 +223,19 @@ function SignInContent() {
 
             <Link
               href="/verify-phone?mode=reset"
-              className="block text-center text-[var(--primary)] hover:underline"
+              className="block text-center text-primary hover:underline"
             >
               Forgot Password?
             </Link>
           </form>
 
           <div className="mt-8 text-center">
-            <span className="text-[var(--muted-foreground)]">
+            <span className="text-muted-foreground">
               Don&apos;t have an account?{" "}
             </span>
             <Link
               href="/verify-phone"
-              className="text-[var(--primary)] font-medium hover:underline"
+              className="text-primary font-medium hover:underline"
             >
               Sign Up
             </Link>
@@ -250,8 +250,8 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-          <span className="spinner w-8 h-8 border-[var(--primary)]" />
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <span className="spinner w-8 h-8 border-primary" />
         </div>
       }
     >

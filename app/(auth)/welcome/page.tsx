@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)]">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-between px-6 py-12">
         {/* Top Section - Logo */}
@@ -26,7 +26,7 @@ export default function WelcomePage() {
         <div className="flex flex-col items-center text-center flex-1 justify-center">
           {/* Title */}
           <h1
-            className="heading-primary text-4xl md:text-5xl text-[var(--primary)] mb-4 animate-fade-in"
+            className="heading-primary text-4xl md:text-5xl text-primary mb-4 animate-fade-in"
             style={{ animationDelay: "0.1s" }}
           >
             Find Your
@@ -84,19 +84,19 @@ export default function WelcomePage() {
 
           <Link
             href="/sign-in"
-            className="block text-center text-[var(--muted-foreground)] mt-4 hover:text-[var(--primary)] transition-colors"
+            className="block text-center text-muted-foreground mt-4 hover:text-primary transition-colors"
           >
             Already have an account?{" "}
-            <span className="text-[var(--primary)] font-medium">Sign In</span>
+            <span className="text-primary font-medium">Sign In</span>
           </Link>
 
-          <p className="text-center text-xs text-[var(--muted-foreground)] mt-6">
+          <p className="text-center text-xs text-muted-foreground mt-6">
             By continuing, you agree to our{" "}
-            <a href="#" className="text-[var(--primary)] hover:underline">
+            <a href="#" className="text-primary hover:underline">
               Terms
             </a>{" "}
             and{" "}
-            <a href="#" className="text-[var(--primary)] hover:underline">
+            <a href="#" className="text-primary hover:underline">
               Privacy Policy
             </a>
           </p>

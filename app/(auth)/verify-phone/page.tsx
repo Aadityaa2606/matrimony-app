@@ -174,7 +174,7 @@ function VerifyPhoneContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)]">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <Link
@@ -187,10 +187,10 @@ function VerifyPhoneContent() {
               setError("");
             }
           }}
-          className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center hover:bg-[var(--border)] transition-colors"
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[var(--foreground)]"
+            className="w-5 h-5 text-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -212,7 +212,7 @@ function VerifyPhoneContent() {
         <div className="animate-fade-in max-w-md mx-auto">
           {step === "phone" ? (
             <>
-              <h1 className="heading-primary text-3xl text-[var(--primary)] mb-2">
+              <h1 className="heading-primary text-3xl text-primary mb-2">
                 {mode === "reset" ? "Reset Password" : "Enter Your Phone"}
               </h1>
               <p className="subtitle mb-8">
@@ -264,13 +264,13 @@ function VerifyPhoneContent() {
             </>
           ) : (
             <>
-              <h1 className="heading-primary text-3xl text-[var(--primary)] mb-2">
+              <h1 className="heading-primary text-3xl text-primary mb-2">
                 Verify OTP
               </h1>
               <p className="subtitle mb-8">
                 Enter the 6-digit code sent to
                 <br />
-                <span className="text-[var(--foreground)] font-medium">
+                <span className="text-foreground font-medium">
                   {phoneNumber}
                 </span>
               </p>
