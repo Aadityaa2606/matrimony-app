@@ -166,8 +166,8 @@ function generatePhoneNumber(): string {
   return `+91${prefix}${rest}`;
 }
 
-async function main() {
-  console.log("🌱 Starting seed...\n");
+async function demo() {
+  console.log("🌱 Starting demo seed...\n");
 
   // Clear existing data (optional - comment out if you want to keep existing data)
   console.log("🗑️  Clearing existing data...");
@@ -180,7 +180,7 @@ async function main() {
 
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  const defaultPassword = await bcrypt.hash("password123", 10);
+  const defaultPassword = await bcrypt.hash("password123", 12);
   const createdUsers: { id: string; gender: Gender }[] = [];
 
   // Create 10 male profiles (GROOM)
@@ -293,26 +293,35 @@ async function main() {
     console.log(`  ✅ Created: ${fullName} (${phoneNumber})`);
   }
 
-  const { SUPERADMIN_USERNAME: username, SUPERADMIN_PASSWORD: adminPassword } =
-    process.env;
-  if (username && adminPassword) {
-    const passwordHash = await bcrypt.hash(adminPassword, 10);
-    await prisma.staff.upsert({
-      where: { username },
-      update: { passwordHash, role: "SUPER_ADMIN", active: true },
-      create: { username, passwordHash, role: "SUPER_ADMIN" },
-    });
-    console.log(`Upserted SUPER_ADMIN staff: ${username}`);
-  } else {
-    console.log("Skipping SUPER_ADMIN: SUPERADMIN_USERNAME/PASSWORD not set");
-  }
-
   console.log("\n🎉 Seed completed successfully!");
   console.log(`   Created ${createdUsers.length} users with profiles`);
   console.log("\n📝 All users have password: password123");
   console.log(
     "   You can log in with any of the phone numbers displayed above.\n",
   );
+}
+
+async function superAdmin() {
+  const { SUPERADMIN_USERNAME: username, SUPERADMIN_PASSWORD: password } = process.env;
+  if (!username || !password) throw new Error("SUPERADMIN_USERNAME and SUPERADMIN_PASSWORD are required");
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.staff.upsert({
+    where: { username },
+    update: { passwordHash, role: "SUPER_ADMIN", active: true },
+    create: { username, passwordHash, role: "SUPER_ADMIN" },
+  });
+  console.log(`Upserted SUPER_ADMIN staff: ${username}`);
+}
+
+async function main() {
+  if (process.env.SEED_DEMO === "1") {
+    const host = new URL(process.env.DATABASE_URL ?? "").hostname;
+    if (host !== "localhost" && host !== "127.0.0.1") {
+      throw new Error(`SEED_DEMO=1 wipes data and is only allowed on localhost (DATABASE_URL host is "${host}")`);
+    }
+    await demo();
+  }
+  await superAdmin();
 }
 
 main()

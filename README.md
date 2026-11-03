@@ -16,6 +16,7 @@ Stack: Next.js 16 (App Router), TypeScript, Prisma 5 + Supabase Postgres, NextAu
    SUPERADMIN_USERNAME=admin SUPERADMIN_PASSWORD=... npm run db:seed
    npm run stream:setup   # once per Stream app: locks client-side message/channel writes
    ```
+   `npm run db:seed` only upserts the super admin (cost-12 bcrypt) and touches nothing else. For local demo data run `SEED_DEMO=1 npm run db:seed`: it wipes users/profiles/payments, adds 20 fake members (password `password123`), and refuses unless `DATABASE_URL` points at localhost/127.0.0.1.
 6. `npm run dev`, `npm test`.
 
 ## Operations
