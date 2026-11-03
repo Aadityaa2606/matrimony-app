@@ -2,67 +2,46 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/db";
+import { normalizePhone } from "@/lib/phone";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
+      id: "member",
       name: "Phone",
       credentials: {
-        phoneNumber: { label: "Phone Number", type: "text" },
+        phone: { label: "Phone Number", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.phoneNumber || !credentials?.password) {
-          return null;
-        }
-
-        const phoneNumber = credentials.phoneNumber as string;
-        const password = credentials.password as string;
+        const phone = normalizePhone(String(credentials?.phone ?? ""));
+        const password = String(credentials?.password ?? "");
+        if (!phone || !password) return null;
 
         const user = await prisma.user.findUnique({
-          where: { phoneNumber },
+          where: { phoneNumber: phone },
         });
-
-        if (!user) {
+        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
           return null;
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          password,
-          user.passwordHash,
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          name: user.displayName,
-          phone: user.phoneNumber,
-        };
+        return { id: user.id, name: user.displayName };
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/sign-in",
-  },
+  session: { strategy: "jwt" },
+  pages: { signIn: "/sign-in" },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.phone = (user as { phone?: string }).phone;
+        token.id = user.id as string;
+        token.kind = "member";
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as { phone?: unknown }).phone = token.phone;
-      }
+      session.user.id = token.id;
+      session.user.kind = token.kind;
+      session.user.role = token.role;
       return session;
     },
   },

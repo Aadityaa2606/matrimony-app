@@ -56,8 +56,8 @@ function SignInContent() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        phoneNumber,
+      const result = await signIn("member", {
+        phone: phoneNumber,
         password,
         redirect: false,
       });
