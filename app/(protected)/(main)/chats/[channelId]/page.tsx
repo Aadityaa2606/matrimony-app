@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useChatClient } from "@/components/ChatProvider";
+import { LangToggle } from "@/components/LangToggle";
 import { useT } from "@/components/LanguageProvider";
 import type { DictKey } from "@/lib/i18n/dict";
 import type { Channel as ChannelType, MessageResponse, Event } from "stream-chat";
@@ -40,6 +41,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(false);
+  const [blockError, setBlockError] = useState(false);
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmBlock, setConfirmBlock] = useState(false);
@@ -167,13 +169,19 @@ export default function ChatPage() {
 
   const setBlock = async (method: "POST" | "DELETE") => {
     if (!chatState) return;
-    await fetch("/api/blocks", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: chatState.otherUserId }),
-    });
-    setConfirmBlock(false);
-    refreshState();
+    setBlockError(false);
+    try {
+      const res = await fetch("/api/blocks", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: chatState.otherUserId }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setConfirmBlock(false);
+      refreshState();
+    } catch {
+      setBlockError(true); // dialog stays open so the user can retry
+    }
   };
 
   if (status === "loading" || !isReady || loading) {
@@ -212,6 +220,7 @@ export default function ChatPage() {
           </div>
         )}
         <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{name}</h2>
+        <LangToggle />
         <div className="relative">
           <button
             onClick={() => setMenuOpen((o) => !o)}
@@ -282,6 +291,7 @@ export default function ChatPage() {
       </div>
 
       <div className="shrink-0 border-t border-border bg-white p-3">
+        {blockError && !confirmBlock && <p className="mb-2 text-center text-base text-error">{t("err.generic")}</p>}
         {chatState && !chatState.canSend ? (
           <div className="flex flex-col items-center gap-2 py-1 text-center">
             <p className="text-base text-muted-foreground">{notice ?? t("err.generic")}</p>
@@ -332,8 +342,12 @@ export default function ChatPage() {
           <div role="dialog" className="w-full max-w-sm rounded-[18px] bg-white p-5">
             <h3 className="mb-2 font-serif text-xl text-primary">{t("chat.block.title", { name })}</h3>
             <p className="mb-4 text-base text-muted-foreground">{t("chat.block.body")}</p>
+            {blockError && <p className="mb-3 text-base text-error">{t("err.generic")}</p>}
             <div className="flex gap-3">
-              <button className="btn flex-1 border border-border" onClick={() => setConfirmBlock(false)}>
+              <button className="btn flex-1 border border-border" onClick={() => {
+                  setConfirmBlock(false);
+                  setBlockError(false);
+                }}>
                 {t("chat.cancel")}
               </button>
               <button className="btn btn-primary flex-1" onClick={() => setBlock("POST")}>
