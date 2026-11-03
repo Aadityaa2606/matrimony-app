@@ -7,7 +7,12 @@ import { logError } from "@/lib/errors";
 export async function POST(req: Request) {
   const raw = await req.text();
   const sig = req.headers.get("x-razorpay-signature") ?? "";
-  if (!verifyWebhookSignature(raw, sig, process.env.RAZORPAY_WEBHOOK_SECRET ?? "")) {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    await logError("payment.webhook", "RAZORPAY_WEBHOOK_SECRET not set");
+    return NextResponse.json({ error: "misconfigured" }, { status: 500 });
+  }
+  if (!verifyWebhookSignature(raw, sig, secret)) {
     return NextResponse.json({ error: "bad_signature" }, { status: 400 });
   }
   try {

@@ -18,6 +18,13 @@ describe("signatures", () => {
   });
 });
 
+describe("empty secret", () => {
+  it("fails closed", () => {
+    expect(verifyCheckoutSignature("o1", "p1", sign("o1|p1", ""), "")).toBe(false);
+    expect(verifyWebhookSignature("{}", sign("{}", ""), "")).toBe(false);
+  });
+});
+
 describe("captureDecision", () => {
   it("maps states", () => {
     expect(captureDecision(null)).toBe("unknown_order");

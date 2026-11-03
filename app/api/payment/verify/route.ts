@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMember } from "@/lib/member";
 import { verifyCheckoutSignature } from "@/lib/razorpay";
+import { logError } from "@/lib/errors";
 import { capturePayment } from "@/lib/payments";
 import { effectiveStatus, landingPath } from "@/lib/lifecycle";
 
@@ -13,7 +14,12 @@ export async function POST(req: Request) {
   if (![orderId, paymentId, sig].every((v) => typeof v === "string" && v)) {
     return NextResponse.json({ error: "bad_signature" }, { status: 400 });
   }
-  if (!verifyCheckoutSignature(orderId, paymentId, sig, process.env.RAZORPAY_KEY_SECRET ?? "")) {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    await logError("payment.verify", "RAZORPAY_KEY_SECRET not set", { userId: m.id });
+    return NextResponse.json({ error: "misconfigured" }, { status: 500 });
+  }
+  if (!verifyCheckoutSignature(orderId, paymentId, sig, secret)) {
     return NextResponse.json({ error: "bad_signature" }, { status: 400 });
   }
   const own = await prisma.payment.findUnique({ where: { razorpayOrderId: orderId }, select: { userId: true } });

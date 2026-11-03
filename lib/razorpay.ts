@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 export const membershipAmountPaise = (): number => Number(process.env.MEMBERSHIP_AMOUNT_PAISE ?? 50000);
 
 function hmacMatches(data: string, signature: string, secret: string): boolean {
+  if (!secret) return false; // fail closed: empty key would still produce a valid HMAC
   const expected = Buffer.from(createHmac("sha256", secret).update(data).digest("hex"));
   const given = Buffer.from(signature);
   return given.length === expected.length && timingSafeEqual(given, expected);
