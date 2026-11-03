@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Gender, Prisma, Profile } from "@prisma/client";
 import { auth } from "@/lib/auth";
+import { sessionKind } from "@/lib/permissions";
 import prisma from "@/lib/db";
 import { effectiveStatus, type EffectiveStatus } from "@/lib/lifecycle";
 
@@ -15,7 +16,7 @@ export type Member = {
 
 export async function getMember(): Promise<Member | null> {
   const session = await auth();
-  if (session?.user?.kind !== "member" || !session.user.id) return null;
+  if (sessionKind(session) !== "member" || !session?.user?.id) return null;
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: { profile: true },
