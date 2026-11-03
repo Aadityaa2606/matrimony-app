@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     data: {
       phoneNumber: phone,
       displayName: name,
-      passwordHash: await bcrypt.hash(password, 10),
+      passwordHash: await bcrypt.hash(password, 12),
     },
   });
   return NextResponse.json({ ok: true }, { status: 201 });
