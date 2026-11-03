@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const r2Host = process.env.R2_PUBLIC_URL ? new URL(process.env.R2_PUBLIC_URL).hostname : null;
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -13,6 +15,7 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
         pathname: "/**",
       },
+      ...(r2Host ? [{ protocol: "https" as const, hostname: r2Host, pathname: "/**" }] : []),
     ],
   },
 };

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { getMember } from "@/lib/member";
+import { parseProfileInput, saveProfile } from "@/lib/profile";
 
 // GET - Fetch current user's profile
 export async function GET() {
@@ -36,116 +38,19 @@ export async function GET() {
 // POST - Create or update profile
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const m = await getMember();
+    if (!m) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    if (!["PENDING_PROFILE", "PENDING_REVIEW", "ACTIVE"].includes(m.status)) {
+      return NextResponse.json({ error: "inactive" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const {
-      fullName,
-      gender,
-      dateOfBirth,
-      height,
-      education,
-      profession,
-      salary,
-      location,
-      community,
-      subCaste,
-      hasHoroscope,
-      parentContact,
-      profilePhoto,
-      additionalPhotos,
-    } = body;
+    const parsed = parseProfileInput(await req.json().catch(() => null), new Date());
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
 
-    // Validate required fields
-    if (
-      !fullName ||
-      !gender ||
-      !dateOfBirth ||
-      !height ||
-      !education ||
-      !profession ||
-      !location ||
-      !community ||
-      hasHoroscope === undefined ||
-      !parentContact ||
-      !profilePhoto
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    // Validate gender
-    if (!["BRIDE", "GROOM"].includes(gender)) {
-      return NextResponse.json(
-        { error: "Gender must be BRIDE or GROOM" },
-        { status: 400 },
-      );
-    }
-
-    // Create or update profile
-    const profile = await prisma.profile.upsert({
-      where: { userId: session.user.id },
-      update: {
-        fullName,
-        gender,
-        dateOfBirth: new Date(dateOfBirth),
-        height,
-        education,
-        profession,
-        salary: salary || null,
-        location,
-        community,
-        subCaste: subCaste || null,
-        hasHoroscope,
-        parentContact,
-        profilePhoto,
-        additionalPhotos: additionalPhotos || [],
-      },
-      create: {
-        userId: session.user.id,
-        fullName,
-        gender,
-        dateOfBirth: new Date(dateOfBirth),
-        height,
-        education,
-        profession,
-        salary: salary || null,
-        location,
-        community,
-        subCaste: subCaste || null,
-        hasHoroscope,
-        parentContact,
-        profilePhoto,
-        additionalPhotos: additionalPhotos || [],
-      },
-    });
-
-    // Check if this is a first-time profile creation (user in PENDING_PROFILE status)
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { status: true },
-    });
-
-    // Only update status to PENDING_PAYMENT if creating for the first time
-    if (user?.status === "PENDING_PROFILE") {
-      await prisma.user.update({
-        where: { id: session.user.id },
-        data: { status: "PENDING_PAYMENT" },
-      });
-    }
-
-    return NextResponse.json({ success: true, profile });
+    await saveProfile(m.id, parsed.data);
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving profile:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
