@@ -150,12 +150,16 @@ export async function createMember(formData: FormData): Promise<Result & { id?: 
     const user = await prisma.user.create({
       data: { phoneNumber: phone, displayName: name, passwordHash: await bcrypt.hash(password, 12) },
     });
-    const parsed = await profileFromForm(user.id, formData);
-    if (!parsed.ok) {
+    try {
+      const parsed = await profileFromForm(user.id, formData);
+      if (!parsed.ok) throw new TransitionError(parsed.error);
+      await saveProfile(user.id, parsed.data);
+    } catch (e) {
+      // leave nothing behind so a retry doesn't hit "phone already exists"
+      await prisma.profile.deleteMany({ where: { userId: user.id } });
       await prisma.user.delete({ where: { id: user.id } });
-      return { error: parsed.error };
+      throw e;
     }
-    await saveProfile(user.id, parsed.data);
     await logActivity(staff.id, "createMember", user.id);
     refresh(user.id);
     return { id: user.id };
