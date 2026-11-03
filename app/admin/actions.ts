@@ -143,6 +143,7 @@ export async function createMember(formData: FormData): Promise<Result & { id?: 
     const name = String(formData.get("name") ?? "").trim();
     const phone = normalizePhone(String(formData.get("phone") ?? ""));
     const password = String(formData.get("password") ?? "");
+    const markedPaid = formData.get("markPaid") === "on";
     if (name.length < 1 || name.length > 60) return { error: "Invalid name" };
     if (!phone) return { error: "Invalid phone number" };
     if (password.length < 8) return { error: "Password must be at least 8 characters" };
@@ -154,13 +155,15 @@ export async function createMember(formData: FormData): Promise<Result & { id?: 
       const parsed = await profileFromForm(user.id, formData);
       if (!parsed.ok) throw new TransitionError(parsed.error);
       await saveProfile(user.id, parsed.data);
+      if (markedPaid) await recordManualPayment(user.id, staff.id, new Date());
     } catch (e) {
       // leave nothing behind so a retry doesn't hit "phone already exists"
+      await prisma.payment.deleteMany({ where: { userId: user.id } });
       await prisma.profile.deleteMany({ where: { userId: user.id } });
       await prisma.user.delete({ where: { id: user.id } });
       throw e;
     }
-    await logActivity(staff.id, "createMember", user.id);
+    await logActivity(staff.id, "createMember", user.id, { markedPaid });
     refresh(user.id);
     return { id: user.id };
   } catch (e) {
