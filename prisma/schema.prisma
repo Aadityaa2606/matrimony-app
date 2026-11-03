@@ -6,30 +6,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Gender {
   BRIDE
   GROOM
-}
-
-enum UserStatus {
-  PENDING_PROFILE    // Just signed up, needs to complete registration
-  PENDING_PAYMENT    // Profile completed, awaiting payment
-  PENDING_REVIEW     // Payment done, under admin review
-  ACTIVE             // Approved and active
-}
-
-model User {
-  id           String     @id @default(cuid())
-  phoneNumber  String     @unique
-  passwordHash String
-  displayName  String
-  status       UserStatus @default(PENDING_PROFILE)
-  profile      Profile?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
 }
 
 model Profile {
@@ -65,24 +48,6 @@ model Profile {
   updatedAt        DateTime @updatedAt
 }
 
-model PhoneOtp {
-  id          String   @id @default(cuid())
-  phoneNumber String   @unique
-  otp         String
-  expiresAt   DateTime
-  attempts    Int      @default(0)
-  createdAt   DateTime @default(now())
-}
-
-model PhoneVerification {
-  id          String   @id @default(cuid())
-  phoneNumber String
-  token       String   @unique
-  expiresAt   DateTime
-  used        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-}
-
 model Favorite {
   id        String   @id @default(cuid())
   userId    String
@@ -99,4 +64,99 @@ model Dismissed {
   createdAt DateTime @default(now())
 
   @@unique([userId, profileId])
+}
+
+enum UserStatus {
+  PENDING_PAYMENT
+  PENDING_PROFILE
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  phoneNumber  String     @unique
+  passwordHash String
+  displayName  String
+  status       UserStatus @default(PENDING_PAYMENT)
+  approvedAt   DateTime?
+  expiresAt    DateTime?
+  profile      Profile?
+  payments     Payment[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  MANUAL
+}
+enum PaymentStatus {
+  CREATED
+  PAID
+  FAILED
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+  amountPaise       Int
+  method            PaymentMethod
+  status            PaymentStatus @default(CREATED)
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?       @unique
+  markedById        String?       // Staff.id for MANUAL
+  failureReason     String?
+  createdAt         DateTime      @default(now())
+  paidAt            DateTime?
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  @@unique([blockerId, blockedId])
+}
+
+model ChatThread {
+  channelId    String  @id
+  starterId    String?
+  starterCount Int     @default(0)
+  unlocked     Boolean @default(false)
+}
+
+enum StaffRole {
+  VIEWER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Staff {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  role         StaffRole
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+}
+
+model ActivityLog {
+  id           String   @id @default(cuid())
+  staffId      String
+  action       String
+  targetUserId String?
+  details      Json?
+  createdAt    DateTime @default(now())
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  context   String
+  message   String
+  details   Json?
+  createdAt DateTime @default(now())
 }

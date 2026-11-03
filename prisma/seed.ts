@@ -174,11 +174,12 @@ async function main() {
   await prisma.dismissed.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.profile.deleteMany();
-  await prisma.phoneVerification.deleteMany();
-  await prisma.phoneOtp.deleteMany();
+  await prisma.payment.deleteMany();
   await prisma.user.deleteMany();
   console.log("✅ Cleared existing data\n");
 
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   const defaultPassword = await bcrypt.hash("password123", 10);
   const createdUsers: { id: string; gender: Gender }[] = [];
 
@@ -196,6 +197,16 @@ async function main() {
         passwordHash: defaultPassword,
         displayName: firstName,
         status: UserStatus.ACTIVE,
+        approvedAt: now,
+        expiresAt,
+        payments: {
+          create: {
+            amountPaise: 50000,
+            method: "MANUAL",
+            status: "PAID",
+            paidAt: now,
+          },
+        },
         profile: {
           create: {
             fullName,
@@ -241,6 +252,16 @@ async function main() {
         passwordHash: defaultPassword,
         displayName: firstName,
         status: UserStatus.ACTIVE,
+        approvedAt: now,
+        expiresAt,
+        payments: {
+          create: {
+            amountPaise: 50000,
+            method: "MANUAL",
+            status: "PAID",
+            paidAt: now,
+          },
+        },
         profile: {
           create: {
             fullName,
@@ -270,6 +291,20 @@ async function main() {
 
     createdUsers.push({ id: user.id, gender: Gender.BRIDE });
     console.log(`  ✅ Created: ${fullName} (${phoneNumber})`);
+  }
+
+  const { SUPERADMIN_USERNAME: username, SUPERADMIN_PASSWORD: adminPassword } =
+    process.env;
+  if (username && adminPassword) {
+    const passwordHash = await bcrypt.hash(adminPassword, 10);
+    await prisma.staff.upsert({
+      where: { username },
+      update: { passwordHash, role: "SUPER_ADMIN", active: true },
+      create: { username, passwordHash, role: "SUPER_ADMIN" },
+    });
+    console.log(`Upserted SUPER_ADMIN staff: ${username}`);
+  } else {
+    console.log("Skipping SUPER_ADMIN: SUPERADMIN_USERNAME/PASSWORD not set");
   }
 
   console.log("\n🎉 Seed completed successfully!");

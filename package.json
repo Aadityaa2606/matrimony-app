@@ -7,20 +7,23 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "postinstall": "prisma generate",
     "db:seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
   },
   "prisma": {
-    "seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
+    "seed": "npm run db:seed"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "aws4fetch": "^1.0.20",
     "bcryptjs": "^3.0.3",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "prisma": "^5.22.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "sharp": "^0.35.5",
     "stream-chat": "^9.35.1",
     "stream-chat-react": "^13.14.0"
   },
@@ -34,6 +37,7 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

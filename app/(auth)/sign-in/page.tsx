@@ -221,25 +221,8 @@ function SignInContent() {
               {loading ? <span className="spinner" /> : "Sign In"}
             </button>
 
-            <Link
-              href="/verify-phone?mode=reset"
-              className="block text-center text-primary hover:underline"
-            >
-              Forgot Password?
-            </Link>
           </form>
 
-          <div className="mt-8 text-center">
-            <span className="text-muted-foreground">
-              Don&apos;t have an account?{" "}
-            </span>
-            <Link
-              href="/verify-phone"
-              className="text-primary font-medium hover:underline"
-            >
-              Sign Up
-            </Link>
-          </div>
         </div>
       </main>
     </div>
