@@ -5,13 +5,13 @@ import { getLang } from "@/lib/i18n/server";
 import "./globals.css";
 
 const sans = Noto_Sans_Tamil({
-  variable: "--font-sans",
+  variable: "--font-noto-sans",
   subsets: ["tamil", "latin"],
   weight: ["400", "500", "600", "700"],
 });
 
 const serif = Noto_Serif_Tamil({
-  variable: "--font-serif",
+  variable: "--font-noto-serif",
   subsets: ["tamil", "latin"],
   weight: ["600", "700"],
 });

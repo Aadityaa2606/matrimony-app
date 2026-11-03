@@ -16,7 +16,7 @@ export function LangToggle() {
         setLang(next);
         router.refresh();
       }}
-      className="rounded-full border border-accent px-3 py-1 text-sm font-semibold text-primary"
+      className="min-h-12 min-w-12 rounded-full border border-accent px-3 py-1 text-sm font-semibold text-primary"
     >
       {t("lang.toggle")}
     </button>
