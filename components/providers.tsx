@@ -2,11 +2,21 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ChatProvider } from "@/components/ChatProvider";
+import { LanguageProvider } from "@/components/LanguageProvider";
+import type { Lang } from "@/lib/i18n/dict";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  initialLang,
+}: {
+  children: React.ReactNode;
+  initialLang: Lang;
+}) {
   return (
     <SessionProvider>
-      <ChatProvider>{children}</ChatProvider>
+      <LanguageProvider initialLang={initialLang}>
+        <ChatProvider>{children}</ChatProvider>
+      </LanguageProvider>
     </SessionProvider>
   );
 }
