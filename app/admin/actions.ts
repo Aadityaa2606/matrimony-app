@@ -9,6 +9,7 @@ import { parseProfileInput, saveProfile } from "@/lib/profile";
 import { storeImage, ImageError } from "@/lib/storage";
 import { recordManualPayment } from "@/lib/payments";
 import { normalizePhone } from "@/lib/phone";
+import { streamServer } from "@/lib/stream";
 
 type Result = { error?: string };
 const msg = (e: unknown) => (e instanceof TransitionError || e instanceof ImageError ? e.message : e instanceof Error ? e.message : "Something went wrong");
@@ -166,6 +167,21 @@ export async function createMember(formData: FormData): Promise<Result & { id?: 
     await logActivity(staff.id, "createMember", user.id, { markedPaid });
     refresh(user.id);
     return { id: user.id };
+  } catch (e) {
+    return { error: msg(e) };
+  }
+}
+
+export async function deleteChatMessage(messageId: string, channelId: string): Promise<Result> {
+  const staff = await requireStaff("moderate");
+  try {
+    const client = streamServer();
+    const { message } = await client.getMessage(messageId);
+    if (message.cid !== `messaging:${channelId}`) return { error: "Message not found in this chat" };
+    await client.deleteMessage(messageId); // soft delete: members see "removed by admin"
+    await logActivity(staff.id, "deleteChatMessage", message.user?.id, { channelId, messageId });
+    revalidatePath(`/admin/chats/${channelId}`);
+    return {};
   } catch (e) {
     return { error: msg(e) };
   }
