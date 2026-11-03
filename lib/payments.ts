@@ -10,6 +10,8 @@ export function captureDecision(p: { status: PaymentStatus } | null): CaptureOut
 }
 
 async function applyAfterPayment(tx: Prisma.TransactionClient, userId: string, now: Date): Promise<void> {
+  // Serialise concurrent captures for one user so expiry is never granted twice.
+  await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
   const user = await tx.user.findUniqueOrThrow({ where: { id: userId }, include: { profile: { select: { id: true } } } });
   const c = afterPayment({ status: user.status, expiresAt: user.expiresAt, hasProfile: !!user.profile, hasPaid: true }, now);
   await tx.user.update({
