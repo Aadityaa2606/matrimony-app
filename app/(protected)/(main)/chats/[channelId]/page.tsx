@@ -4,15 +4,14 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useChatClient } from "@/components/ChatProvider";
-import type {
-  Channel as ChannelType,
-  MessageResponse,
-  Event,
-} from "stream-chat";
+import { useT } from "@/components/LanguageProvider";
+import type { DictKey } from "@/lib/i18n/dict";
+import type { Channel as ChannelType, MessageResponse, Event } from "stream-chat";
 
 interface ChatMessage {
   id: string;
   text: string;
+  deleted: boolean;
   userId: string;
   userName: string;
   userImage?: string;
@@ -20,36 +19,52 @@ interface ChatMessage {
   isMine: boolean;
 }
 
+interface ChatState {
+  canSend: boolean;
+  reason: string | null;
+  otherUserId: string;
+  iBlocked: boolean;
+}
+
+const NOTICES = ["await_reply", "blocked_you", "blocked_by_you", "other_inactive", "inactive"];
+
 export default function ChatPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
+  const { t, lang } = useT();
   const { client, isReady } = useChatClient();
   const [channel, setChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [otherUser, setOtherUser] = useState<{
-    name: string;
-    image?: string;
-    online?: boolean;
-  } | null>(null);
+  const [error, setError] = useState(false);
+  const [chatState, setChatState] = useState<ChatState | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmBlock, setConfirmBlock] = useState(false);
+  const [otherUser, setOtherUser] = useState<{ name: string; image?: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inFlight = useRef(false);
 
   const channelId = params.channelId as string;
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  const refreshState = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/chat/state?channelId=${encodeURIComponent(channelId)}`);
+      if (r.ok) setChatState(await r.json());
+    } catch {
+      /* keep previous state */
+    }
+  }, [channelId]);
 
   const formatMessage = useCallback(
     (msg: MessageResponse, currentUserId: string): ChatMessage => ({
       id: msg.id,
       text: msg.text || "",
+      deleted: msg.type === "deleted",
       userId: msg.user?.id || "",
-      userName: (msg.user?.name as string) || "Unknown",
+      userName: (msg.user?.name as string) || "?",
       userImage: msg.user?.image as string | undefined,
       createdAt: new Date(msg.created_at as string),
       isMine: msg.user?.id === currentUserId,
@@ -58,326 +73,276 @@ export default function ChatPage() {
   );
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/sign-in");
-    }
+    if (status === "unauthenticated") router.push("/sign-in");
   }, [status, router]);
 
   useEffect(() => {
     if (!isReady || !client || !session?.user?.id || !channelId) return;
     const currentUserId = session.user.id;
-
     let activeChannel: ChannelType | null = null;
 
-    const initChannel = async () => {
+    (async () => {
       try {
         const ch = client.channel("messaging", channelId);
         await ch.watch();
         activeChannel = ch;
         setChannel(ch);
-
-        // Get other user info
-        const members = Object.values(ch.state.members);
-        const other = members.find((m) => m.user_id !== currentUserId);
+        const other = Object.values(ch.state.members).find((m) => m.user_id !== currentUserId);
         if (other?.user) {
-          setOtherUser({
-            name: other.user.name as string,
-            image: other.user.image as string | undefined,
-            online: other.user.online,
-          });
+          setOtherUser({ name: other.user.name as string, image: other.user.image as string | undefined });
         }
-
-        // Load messages
-        const formattedMessages = ch.state.messages.map((msg) =>
-          formatMessage(msg as unknown as MessageResponse, currentUserId),
+        setMessages(
+          ch.state.messages.map((m) => formatMessage(m as unknown as MessageResponse, currentUserId)),
         );
-        setMessages(formattedMessages);
-
-        // Mark as read
         await ch.markRead();
-      } catch (error) {
-        console.error("Error loading channel:", error);
+        refreshState();
+      } catch (e) {
+        console.error("Error loading channel:", e);
         router.push("/chats");
       } finally {
         setLoading(false);
       }
-    };
-
-    initChannel();
+    })();
 
     return () => {
-      if (activeChannel) {
-        activeChannel.stopWatching();
-      }
+      activeChannel?.stopWatching();
     };
-  }, [isReady, client, session?.user?.id, channelId, router, formatMessage]);
+  }, [isReady, client, session?.user?.id, channelId, router, formatMessage, refreshState]);
 
-  // Listen for new messages
+  // Live updates. Our own sends arrive here too (server sends on our behalf).
   useEffect(() => {
     if (!channel || !session?.user?.id) return;
-    const msgUserId = session.user.id;
-
-    const handleNewMessage = (event: Event) => {
-      if (event.message) {
-        const formatted = formatMessage(
-          event.message as unknown as MessageResponse,
-          msgUserId,
-        );
-        setMessages((prev) => [...prev, formatted]);
-        channel.markRead();
-      }
+    const uid = session.user.id;
+    const onNew = (event: Event) => {
+      if (!event.message) return;
+      const f = formatMessage(event.message as unknown as MessageResponse, uid);
+      setMessages((prev) => (prev.some((m) => m.id === f.id) ? prev : [...prev, f]));
+      channel.markRead();
+      refreshState();
     };
-
-    channel.on("message.new", handleNewMessage);
-
+    const onDeleted = (event: Event) => {
+      if (!event.message) return;
+      const f = formatMessage(event.message as unknown as MessageResponse, uid);
+      setMessages((prev) => prev.map((m) => (m.id === f.id ? f : m)));
+    };
+    channel.on("message.new", onNew);
+    channel.on("message.deleted", onDeleted);
+    channel.on("message.updated", onDeleted);
     return () => {
-      channel.off("message.new", handleNewMessage);
+      channel.off("message.new", onNew);
+      channel.off("message.deleted", onDeleted);
+      channel.off("message.updated", onDeleted);
     };
-  }, [channel, session?.user?.id, formatMessage]);
+  }, [channel, session?.user?.id, formatMessage, refreshState]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  // Anti-spam: count consecutive trailing messages from current user
-  const MAX_UNANSWERED = 2;
-  const consecutiveOwnMessages = (() => {
-    let count = 0;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].isMine) count++;
-      else break;
-    }
-    return count;
-  })();
-  const isBlocked = consecutiveOwnMessages >= MAX_UNANSWERED;
+  const post = () =>
+    fetch("/api/chat/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channelId, text: newMessage.trim() }),
+    });
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !channel || sending || isBlocked) return;
-
-    const messageText = newMessage.trim();
-    setNewMessage("");
+    if (!newMessage.trim() || inFlight.current) return;
+    inFlight.current = true; // ref guards double-tap before state re-renders
     setSending(true);
-
+    setError(false);
     try {
-      await channel.sendMessage({ text: messageText });
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setNewMessage(messageText); // Restore message on error
+      let res = await post();
+      if (res.status === 409) res = await post(); // one automatic retry
+      if (res.ok) setNewMessage("");
+      else setError(true);
+    } catch {
+      setError(true);
     } finally {
+      inFlight.current = false;
       setSending(false);
-      inputRef.current?.focus();
+      refreshState();
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  const setBlock = async (method: "POST" | "DELETE") => {
+    if (!chatState) return;
+    await fetch("/api/blocks", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: chatState.otherUserId }),
+    });
+    setConfirmBlock(false);
+    refreshState();
   };
 
   if (status === "loading" || !isReady || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <span className="spinner w-8 h-8 border-primary" />
-          <p className="text-sm text-muted-foreground">Loading chat...</p>
-        </div>
+      <div className="flex items-center justify-center py-24">
+        <span className="spinner w-8 h-8 border-primary" />
       </div>
     );
   }
+  if (!session || !channel) return null;
 
-  if (!session || !channel) {
-    return null;
-  }
+  const name = otherUser?.name || t("chat.unknown");
+  const time = (d: Date) =>
+    d.toLocaleTimeString(lang === "ta" ? "ta-IN" : "en-IN", { hour: "2-digit", minute: "2-digit" });
+  const reason = chatState?.reason;
+  const notice = reason && NOTICES.includes(reason) ? t(`chat.${reason}` as DictKey) : null;
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-background z-50">
-      {/* Chat Header */}
-      <header className="bg-gradient-hero text-white p-4 shadow-lg flex items-center gap-3 shrink-0">
+    <div className="fixed inset-x-0 bottom-16 top-0 z-40 flex flex-col bg-background">
+      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-white px-2 py-2">
         <button
           onClick={() => router.push("/chats")}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+          aria-label={t("chat.back")}
+          className="flex h-12 w-12 items-center justify-center rounded-full text-primary"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-
-        {/* User Info */}
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="relative shrink-0">
-            {otherUser?.image ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={otherUser.image}
-                alt={otherUser.name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-serif">
-                {otherUser?.name?.[0]?.toUpperCase() || "?"}
-              </div>
-            )}
-            {otherUser?.online && (
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-primary-dark" />
-            )}
+        {otherUser?.image ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={otherUser.image} alt="" className="h-10 w-10 rounded-full object-cover" />
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-serif text-white">
+            {name[0]?.toUpperCase()}
           </div>
-          <div className="min-w-0">
-            <h2 className="font-semibold truncate">
-              {otherUser?.name || "Chat"}
-            </h2>
-            <p className="text-xs text-white/70">
-              {otherUser?.online ? "Online" : "Offline"}
-            </p>
-          </div>
+        )}
+        <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{name}</h2>
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={t("chat.menu")}
+            className="flex h-12 w-12 items-center justify-center rounded-full text-primary"
+          >
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="5" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="19" r="2" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-12 z-10 w-56 rounded-[14px] border border-border bg-white py-1 shadow-lg">
+              {chatState && !chatState.iBlocked && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setConfirmBlock(true);
+                  }}
+                  className="min-h-12 w-full px-4 text-left text-base text-error"
+                >
+                  {t("chat.block")}
+                </button>
+              )}
+              {chatState?.iBlocked && (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setBlock("DELETE");
+                  }}
+                  className="min-h-12 w-full px-4 text-left text-base"
+                >
+                  {t("settings.unblock")}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden px-3 py-3">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center opacity-60">
-            <div className="w-16 h-16 rounded-full bg-(--accent)/20 flex items-center justify-center mb-4">
-              <svg
-                className="w-8 h-8 text-accent"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
-            </div>
-            <p className="text-muted-foreground text-sm">
-              Say hello to {otherUser?.name || "your match"}! 👋
-            </p>
-          </div>
+          <p className="py-16 text-center text-base text-muted-foreground">{t("chat.hello", { name })}</p>
         ) : (
-          messages.map((msg, index) => {
-            const showAvatar =
-              !msg.isMine && (index === 0 || messages[index - 1]?.isMine);
-
-            return (
+          messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.isMine ? "justify-end" : "justify-start"}`}>
               <div
-                key={msg.id}
-                className={`flex ${msg.isMine ? "justify-end" : "justify-start"} animate-fade-in`}
+                className={`max-w-[80%] rounded-[18px] px-4 py-2 ${
+                  msg.deleted
+                    ? "border border-border bg-muted text-muted-foreground"
+                    : msg.isMine
+                      ? "rounded-br-md bg-primary text-white"
+                      : "rounded-bl-md border border-border bg-white text-foreground"
+                }`}
               >
-                <div
-                  className={`flex items-end gap-2 max-w-[80%] ${msg.isMine ? "flex-row-reverse" : ""}`}
-                >
-                  {/* Avatar for other user */}
-                  {!msg.isMine && (
-                    <div className="shrink-0 w-7">
-                      {showAvatar ? (
-                        msg.userImage ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={msg.userImage}
-                            alt={msg.userName}
-                            className="w-7 h-7 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-serif">
-                            {msg.userName[0]?.toUpperCase()}
-                          </div>
-                        )
-                      ) : null}
-                    </div>
-                  )}
-
-                  {/* Message Bubble */}
-                  <div
-                    className={`px-4 py-2.5 rounded-2xl ${
-                      msg.isMine
-                        ? "bg-primary text-white rounded-br-md"
-                        : "bg-white text-foreground rounded-bl-md shadow-sm"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
-                      {msg.text}
-                    </p>
-                    <p
-                      className={`text-[10px] mt-1 ${
-                        msg.isMine ? "text-white/60" : "text-muted-foreground"
-                      }`}
-                    >
-                      {msg.createdAt.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
+                <p className={`whitespace-pre-wrap break-words text-base leading-relaxed ${msg.deleted ? "italic" : ""}`}>
+                  {msg.deleted ? t("chat.removedByAdmin") : msg.text}
+                </p>
+                <p className={`mt-0.5 text-xs ${msg.isMine && !msg.deleted ? "text-white/70" : "text-muted-foreground"}`}>
+                  {time(msg.createdAt)}
+                </p>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
-      <div className="shrink-0 bg-white border-t border-border p-3 pb-safe">
-        {isBlocked ? (
-          <div className="max-w-2xl mx-auto text-center py-2">
-            <p className="text-sm text-muted-foreground">
-              ⏳ Waiting for{" "}
-              <span className="font-semibold">{otherUser?.name || "them"}</span>{" "}
-              to reply before you can send more messages
-            </p>
+      <div className="shrink-0 border-t border-border bg-white p-3">
+        {chatState && !chatState.canSend ? (
+          <div className="flex flex-col items-center gap-2 py-1 text-center">
+            <p className="text-base text-muted-foreground">{notice ?? t("err.generic")}</p>
+            {reason === "blocked_by_you" && (
+              <button className="btn btn-primary" onClick={() => setBlock("DELETE")}>
+                {t("settings.unblock")}
+              </button>
+            )}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto flex items-center gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              className="flex-1 px-4 py-3 bg-muted rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-(--primary)/30 transition-all"
-            />
-            <button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || sending}
-              className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark disabled:opacity-40 transition-all disabled:cursor-not-allowed"
-            >
-              {sending ? (
-                <span className="spinner w-4 h-4" />
-              ) : (
-                <svg
-                  className="w-5 h-5 rotate-90"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
+          <>
+            {error && <p className="mb-2 text-base text-error">{t("err.generic")}</p>}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder={t("chat.placeholder")}
+                className="min-h-12 min-w-0 flex-1 rounded-full border border-border bg-input px-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || sending}
+                aria-label={t("chat.send")}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white disabled:opacity-40"
+              >
+                {sending ? (
+                  <span className="spinner w-4 h-4" />
+                ) : (
+                  <svg className="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </>
         )}
       </div>
+
+      {confirmBlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div role="dialog" className="w-full max-w-sm rounded-[18px] bg-white p-5">
+            <h3 className="mb-2 font-serif text-xl text-primary">{t("chat.block.title", { name })}</h3>
+            <p className="mb-4 text-base text-muted-foreground">{t("chat.block.body")}</p>
+            <div className="flex gap-3">
+              <button className="btn flex-1 border border-border" onClick={() => setConfirmBlock(false)}>
+                {t("chat.cancel")}
+              </button>
+              <button className="btn btn-primary flex-1" onClick={() => setBlock("POST")}>
+                {t("chat.block.yes")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
