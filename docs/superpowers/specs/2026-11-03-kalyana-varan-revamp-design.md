@@ -29,7 +29,8 @@ Nothing is live. All current data is dummy, and the new database starts empty.
 4. Remove OTP entirely. Phone and password only. Forgotten passwords are reset by staff.
 5. Admin panel with three roles, covering moderation, users, chats, payments and blocks.
 6. Blocking inside chat.
-7. Move to Neon Postgres (fresh) and Cloudflare R2 for photos.
+7. Move to Supabase Postgres (fresh) and Cloudflare R2 for photos, with our own
+   encrypted daily backups.
 
 ## Non-goals
 
@@ -41,7 +42,6 @@ Nothing is live. All current data is dummy, and the new database starts empty.
 - No complex matching (no scoring engine, no preference settings, no horoscope
   matching), and no new profile fields beyond what's listed here. Simple matching is
   described below.
-- No keep-alive pinging of the database (see "Database sleep").
 
 ## Anti-goals (failure even if it "works")
 
@@ -58,9 +58,18 @@ Nothing is live. All current data is dummy, and the new database starts empty.
 - Existing stack stays: Next.js 16 App Router, TypeScript, Prisma 5, NextAuth v5
   (Credentials + JWT), Stream Chat (`stream-chat` client with custom UI, not
   `stream-chat-react` components), Tailwind v4.
-- **Database:** Neon Postgres free plan (1 GB per project; the DB sleeps when idle,
-  so the first request after idle is slower). Start from a clean migration history
-  if that's simpler. Nothing needs preserving.
+- **Database:** Supabase Postgres, free plan, used only as a plain Postgres database
+  through Prisma. We don't use Supabase Auth, Storage or its client library. The limits:
+  - 500 MB of database storage. Going over makes it read-only, but our data is text
+    only and well under that.
+  - The project pauses after 7 days with no activity. The uptime monitor prevents this
+    (see the health section).
+  - No automatic backups on the free plan. We add our own (see "Backups").
+
+  Use Supabase's pooled connection for the app (transaction pooler, port 6543,
+  `?pgbouncer=true`) as `DATABASE_URL`, and the session or direct connection as
+  `DIRECT_URL` for Prisma migrations (`directUrl` in the schema). Start from a clean
+  migration history if that's simpler. Nothing needs preserving.
 - **Photos:** Cloudflare R2 free plan (10 GB storage, free downloads). Uploading to
   `public/uploads` on local disk must go; it doesn't survive serverless hosting.
   Resize and compress uploads to roughly ≤200 KB each.
@@ -241,19 +250,34 @@ The owner asked for simple matching. The exact weights are *my call*:
 - All of this is computed in the query or in a few lines of code. There's no stored
   score, no preference settings, and nothing for the member to configure.
 
-## Decided: health endpoint and database sleep
+## Decided: health endpoint (keeps Supabase from pausing)
 
-- Add `GET /api/health`, which returns `200 {"ok":true}` **without touching the
-  database**. This is for the uptime monitor the owner will add later.
-- `GET /api/health?db=1` also runs `SELECT 1` and reports database status, for manual
-  checks. The uptime monitor must not be pointed at the `?db=1` version.
-- **No keep-alive pinging of Neon.** On the free plan, Neon sleeps after 5 minutes idle
-  and this can't be turned off. The free plan gives 100 compute-hours a month, and the
-  smallest database size uses 0.25 an hour, so staying awake around the clock would use
-  about 183 hours. The allowance would run out around day 16 and the database would be
-  unavailable for the rest of the month. Waking from sleep takes well under a second,
-  so the right fix is to let it sleep. If cold starts become a real problem, move to
-  Neon's paid Launch plan, where scale-to-zero can be disabled.
+- Add `GET /api/health`. It runs `SELECT 1` against the database and returns
+  `200 {"ok":true,"db":"up"}`, or `503` if the database can't be reached.
+- The owner's uptime monitor (added later) will hit this every few minutes. That both
+  alerts on outages and keeps the Supabase free project from pausing after 7 idle
+  days. Supabase's free plan doesn't charge for running hours, so frequent pings cost
+  nothing.
+- No authentication, and the response contains no data beyond up or down.
+
+## Decided: backups (GitHub Action)
+
+Supabase free has no automatic backups. This copies the owner's existing pattern
+from another project:
+
+- A scheduled GitHub Actions workflow runs **daily** (*my call*) and can also be
+  triggered manually.
+- It runs `pg_dump` against the database, using a `postgresql-client` version that
+  matches the Supabase server's Postgres major version. It encrypts the dump with
+  `gpg --symmetric` (AES-256) using a passphrase stored as a repo secret, and uploads
+  it as a workflow artifact with `retention-days: 30`.
+- Connect through Supabase's **session pooler** URL, not the direct host. The direct
+  connection is IPv6-only on the free plan, and GitHub-hosted runners don't have IPv6.
+- Repo secrets: `BACKUP_DATABASE_URL` and `BACKUP_PASSPHRASE`.
+- The README gets a short "restore from backup" section: download the artifact,
+  `gpg --decrypt`, then `psql` or `pg_restore` into a database.
+- The daily run also counts as database activity, which is a second guard against the
+  7-day pause.
 
 ## Decided: starting a chat (two-message rule)
 
@@ -300,6 +324,7 @@ The owner asked for simple matching. The exact weights are *my call*:
 
 ## Config the owner must provide
 
-`DATABASE_URL` (Neon), the R2 bucket and keys, the Razorpay key ID, secret and webhook
+`DATABASE_URL` and `DIRECT_URL` (Supabase), the backup secrets in GitHub
+(`BACKUP_DATABASE_URL`, `BACKUP_PASSPHRASE`), the R2 bucket and keys, the Razorpay key ID, secret and webhook
 secret, the Stream key and secret (existing), the support phone number, the membership
 amount (default ₹500), and the initial super admin credentials.
