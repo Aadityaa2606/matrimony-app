@@ -1,5 +1,6 @@
 "use client";
 
+import { shrinkImage } from "@/lib/shrink-image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -40,7 +41,7 @@ export const educations: [string, DictKey][] = [
 const stepKeys: DictKey[] = ["reg.s1", "reg.s2", "reg.s3", "reg.s4"];
 const TOTAL = 4;
 const MAX_MORE = 5;
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024; // Vercel body cap is 4.5 MB
 
 const ageOf = (dob: string) => {
   const b = new Date(dob);
@@ -88,13 +89,14 @@ export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boole
 
   async function upload(file: File, main: boolean) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return setErr("reg.e.type");
-    if (file.size > MAX_BYTES) return setErr("reg.e.size");
     if (!main && f.additionalPhotos.length >= MAX_MORE) return setErr("reg.e.max");
     setUploading(true);
     setErr(null);
     try {
+      const small = await shrinkImage(file);
+      if (small.size > MAX_BYTES) return setErr("reg.e.size");
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", small);
       const res = await fetch("/api/profile/upload", { method: "POST", body: fd });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.url) return setErr("err.generic");
