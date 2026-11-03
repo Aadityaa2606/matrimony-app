@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Script from "next/script";
-import { useRouter } from "next/navigation";
 import { OutsideScreen } from "@/components/OutsideScreen";
 import { SupportLine } from "@/components/SupportLine";
 import { useT } from "@/components/LanguageProvider";
@@ -18,7 +17,6 @@ declare global {
 
 export function PaymentClient({ renew, amount }: { renew: boolean; amount: number }) {
   const { t } = useT();
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<DictKey | null>(null);
 
@@ -36,7 +34,7 @@ export function PaymentClient({ renew, amount }: { renew: boolean; amount: numbe
       });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.next) return fail(errorKey(body?.error));
-      router.push(body.next);
+      window.location.assign(body.next); // full reload so ChatProvider refetches its token
     } catch {
       fail("err.generic");
     }
