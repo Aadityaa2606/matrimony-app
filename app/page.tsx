@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
+import { getMember } from "@/lib/member";
 
-export default function HomePage() {
-  // Redirect to welcome page for now
-  // Later this will check auth and redirect appropriately
-  redirect("/welcome");
+export default async function RootPage() {
+  redirect((await getMember()) ? "/dashboard" : "/welcome");
 }
