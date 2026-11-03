@@ -1,282 +1,138 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { LangToggle } from "@/components/LangToggle";
+import { useT } from "@/components/LanguageProvider";
+import { PasswordInput } from "@/components/PasswordInput";
+import type { DictKey } from "@/lib/i18n/dict";
 
-interface UserProfile {
-  fullName: string;
-  profilePhoto: string;
-  location: string;
-  community: string;
-}
+type Me = { fullName: string; profilePhoto: string; location: string; community: string };
+type Blocked = { userId: string; name: string; photo: string | null };
+
+const card = "rounded-[18px] bg-white p-4 shadow-[0_4px_16px_rgba(120,80,20,.08)]";
 
 export default function SettingsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { t, lang } = useT();
+  const [me, setMe] = useState<Me | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [blocked, setBlocked] = useState<Blocked[]>([]);
+  const [cur, setCur] = useState("");
+  const [next, setNext] = useState("");
+  const [pwMsg, setPwMsg] = useState<{ key: DictKey; ok: boolean } | null>(null);
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/sign-in");
-      return;
-    }
+    fetch("/api/profile").then((r) => r.json()).then((d) => setMe(d.profile ?? null)).catch(() => {});
+    fetch("/api/user/status").then((r) => r.json()).then((d) => setExpiresAt(d.expiresAt ?? null)).catch(() => {});
+    fetch("/api/blocks").then((r) => r.json()).then((d) => Array.isArray(d) && setBlocked(d)).catch(() => {});
+  }, []);
 
-    if (status === "authenticated") {
-      fetchProfile();
-    }
-  }, [status, router]);
+  async function unblock(userId: string) {
+    const res = await fetch("/api/blocks", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    }).catch(() => null);
+    if (res?.ok) setBlocked((b) => b.filter((x) => x.userId !== userId));
+  }
 
-  const fetchProfile = async () => {
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (next.length < 8) return setPwMsg({ key: "err.password", ok: false });
+    setPwBusy(true);
+    setPwMsg(null);
     try {
-      const res = await fetch("/api/profile");
-      const data = await res.json();
-      if (data.profile) {
-        setProfile(data.profile);
+      const res = await fetch("/api/account/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: cur, newPassword: next }),
+      });
+      if (res.ok) {
+        setCur("");
+        setNext("");
+        setPwMsg({ key: "settings.pw.ok", ok: true });
+      } else {
+        setPwMsg({ key: res.status === 401 ? "settings.pw.wrong" : res.status === 400 ? "err.password" : "err.generic", ok: false });
       }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+    } catch {
+      setPwMsg({ key: "err.generic", ok: false });
     } finally {
-      setLoading(false);
+      setPwBusy(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/welcome" });
-  };
-
-  if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="spinner w-8 h-8 border-primary" />
-      </div>
-    );
   }
 
-  if (!session) {
-    return null;
-  }
+  const date = expiresAt
+    ? new Date(expiresAt).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN", { day: "numeric", month: "long", year: "numeric" })
+    : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-hero text-white p-6 pb-8 rounded-b-3xl shadow-lg">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-serif font-semibold">My Profile</h1>
-          <p className="text-white/80 text-sm mt-1">
-            Manage your account settings
-          </p>
-        </div>
-      </header>
+    <main className="mx-auto max-w-md space-y-4 px-4 pt-2">
+      <h1 className="font-serif text-xl font-bold text-primary">{t("settings.title")}</h1>
 
-      <main className="p-4 pt-6 max-w-2xl mx-auto">
-        {/* Profile Card */}
-        <div className="card animate-fade-in mb-4">
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden border-3 border-accent shrink-0">
-              {profile?.profilePhoto ? (
-                <Image
-                  src={profile.profilePhoto}
-                  alt={profile.fullName}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-(--primary)/10 flex items-center justify-center">
-                  <svg
-                    className="w-10 h-10 text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <h2 className="heading-secondary text-xl text-foreground">
-                {profile?.fullName || session.user?.name || "User"}
-              </h2>
-              {profile && (
-                <p className="text-sm text-muted-foreground">
-                  {profile.location} • {profile.community}
-                </p>
-              )}
-              <p className="text-sm text-success mt-1 flex items-center gap-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Profile Verified
-              </p>
-            </div>
-          </div>
+      <div className={`${card} flex items-center gap-4`}>
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-accent bg-muted">
+          {me?.profilePhoto && <Image src={me.profilePhoto} alt="" fill sizes="80px" className="object-cover" />}
         </div>
-
-        {/* Menu Items */}
-        <div className="card p-0 overflow-hidden animate-fade-in">
-          <MenuItem
-            icon={
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            }
-            label="Edit Profile"
-            onClick={() => router.push("/edit-profile")}
-          />
-          <MenuItem
-            icon={
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            }
-            label="Notifications"
-            badge="Coming Soon"
-          />
-          <MenuItem
-            icon={
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            }
-            label="Privacy Settings"
-            badge="Coming Soon"
-          />
-          <MenuItem
-            icon={
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            }
-            label="Help & Support"
-            badge="Coming Soon"
-          />
+        <div className="min-w-0">
+          <h2 className="font-serif text-lg font-bold">{me?.fullName}</h2>
+          {me && <p className="text-sm text-muted-foreground">{me.location} · {me.community}</p>}
+          <span className="mt-1 inline-block rounded-full bg-[#e6f2e8] px-2.5 py-1 text-xs font-bold text-success">
+            ✓ {t("settings.verified")}
+          </span>
         </div>
+      </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="btn btn-outline w-full mt-6 text-error border-error hover:bg-(--error)/10"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          Sign Out
+      <Link href="/edit-profile" className="btn btn-outline w-full">{t("settings.edit")}</Link>
+
+      <section className={card}>
+        {date && <p className="mb-3 font-semibold">{t("settings.until", { date })}</p>}
+        <Link href="/payment" className="btn btn-primary w-full">{t("banner.renew")}</Link>
+      </section>
+
+      <section className={`${card} flex items-center justify-between`}>
+        <span className="font-semibold">{t("settings.lang")}</span>
+        <LangToggle />
+      </section>
+
+      <form onSubmit={changePassword} className={`${card} space-y-3`}>
+        <h2 className="font-serif text-lg font-bold text-primary">{t("settings.pw.title")}</h2>
+        <PasswordInput value={cur} onChange={setCur} autoComplete="current-password" placeholder={t("settings.pw.current")} />
+        <PasswordInput value={next} onChange={setNext} autoComplete="new-password" placeholder={t("settings.pw.new")} />
+        {pwMsg && (
+          <p role="alert" className={`font-medium ${pwMsg.ok ? "text-success" : "text-error"}`}>{t(pwMsg.key)}</p>
+        )}
+        <button className="btn btn-primary w-full" disabled={pwBusy || !cur || !next}>
+          {pwBusy ? <span className="spinner" /> : t("settings.pw.save")}
         </button>
+      </form>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          App Version 1.0.0
-        </p>
-      </main>
-    </div>
-  );
-}
+      <section className={card}>
+        <h2 className="mb-3 font-serif text-lg font-bold text-primary">{t("settings.blocked.title")}</h2>
+        {blocked.length === 0 ? (
+          <p className="text-muted-foreground">{t("settings.blocked.none")}</p>
+        ) : (
+          <ul className="space-y-3">
+            {blocked.map((b) => (
+              <li key={b.userId} className="flex items-center gap-3">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+                  {b.photo && <Image src={b.photo} alt="" fill sizes="48px" className="object-cover" />}
+                </div>
+                <span className="min-w-0 flex-1 truncate font-semibold">{b.name}</span>
+                <button onClick={() => unblock(b.userId)} className="btn btn-outline min-h-12 px-3 py-2">
+                  {t("settings.unblock")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-function MenuItem({
-  icon,
-  label,
-  onClick,
-  badge,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  badge?: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 hover:bg-muted transition-colors border-b border-border last:border-0"
-    >
-      <div className="w-10 h-10 rounded-full bg-(--primary)/10 flex items-center justify-center text-primary">
-        {icon}
-      </div>
-      <span className="flex-1 text-left font-medium">{label}</span>
-      {badge && (
-        <span className="text-xs px-2 py-1 bg-(--accent)/20 text-accent rounded-full">
-          {badge}
-        </span>
-      )}
-      <svg
-        className="w-5 h-5 text-muted-foreground"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </button>
+      <button onClick={() => signOut({ callbackUrl: "/welcome" })} className="btn btn-outline w-full border-error text-error">
+        {t("common.signOut")}
+      </button>
+    </main>
   );
 }

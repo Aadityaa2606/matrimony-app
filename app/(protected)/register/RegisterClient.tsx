@@ -7,7 +7,7 @@ import { OutsideScreen } from "@/components/OutsideScreen";
 import { useT } from "@/components/LanguageProvider";
 import type { DictKey } from "@/lib/i18n/dict";
 
-type Form = {
+export type Form = {
   fullName: string;
   gender: "BRIDE" | "GROOM" | "";
   dateOfBirth: string;
@@ -24,7 +24,7 @@ type Form = {
   additionalPhotos: string[];
 };
 
-const initial: Form = {
+const emptyForm: Form = {
   fullName: "", gender: "", dateOfBirth: "", height: "", education: "", profession: "",
   salary: "", location: "", community: "", subCaste: "", hasHoroscope: null,
   parentContact: "", profilePhoto: "", additionalPhotos: [],
@@ -32,7 +32,7 @@ const initial: Form = {
 
 const heights = Array.from({ length: 25 }, (_, i) => `${4 + Math.floor((i + 6) / 12)}'${(i + 6) % 12}"`);
 // Stored values stay English (existing data); labels are translated.
-const educations: [string, DictKey][] = [
+export const educations: [string, DictKey][] = [
   ["High School", "reg.edu.hs"], ["Diploma", "reg.edu.dip"], ["Bachelor's Degree", "reg.edu.bach"],
   ["Master's Degree", "reg.edu.mast"], ["Doctorate (PhD)", "reg.edu.phd"],
   ["Professional Degree (MD, JD, etc.)", "reg.edu.prof"], ["Other", "reg.edu.other"],
@@ -51,11 +51,30 @@ const ageOf = (dob: string) => {
 };
 const digits = (v: string) => v.replace(/\D/g, "");
 
-export function RegisterClient() {
+function validateStep(f: Form, step: number): DictKey | null {
+  if (step === 1) {
+    if (!f.fullName.trim()) return "reg.e.name";
+    if (!f.gender) return "reg.e.gender";
+    if (!f.dateOfBirth) return "reg.e.dob";
+    if (ageOf(f.dateOfBirth) < 18) return "reg.e.age";
+    if (!f.height) return "reg.e.height";
+  } else if (step === 2) {
+    if (!f.education) return "reg.e.edu";
+    if (!f.profession.trim()) return "reg.e.job";
+  } else if (step === 3) {
+    if (!f.location.trim()) return "reg.e.loc";
+    if (!f.community.trim()) return "reg.e.comm";
+    if (f.hasHoroscope === null) return "reg.e.horo";
+    if (f.parentContact.length !== 10) return "reg.e.parent";
+  } else if (!f.profilePhoto) return "reg.e.photo";
+  return null;
+}
+
+export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boolean } = {}) {
   const { t } = useT();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [f, setF] = useState<Form>(initial);
+  const [f, setF] = useState<Form>(initial ?? emptyForm);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<DictKey | null>(null);
@@ -65,24 +84,7 @@ export function RegisterClient() {
     setErr(null);
   };
 
-  function validate(): DictKey | null {
-    if (step === 1) {
-      if (!f.fullName.trim()) return "reg.e.name";
-      if (!f.gender) return "reg.e.gender";
-      if (!f.dateOfBirth) return "reg.e.dob";
-      if (ageOf(f.dateOfBirth) < 18) return "reg.e.age";
-      if (!f.height) return "reg.e.height";
-    } else if (step === 2) {
-      if (!f.education) return "reg.e.edu";
-      if (!f.profession.trim()) return "reg.e.job";
-    } else if (step === 3) {
-      if (!f.location.trim()) return "reg.e.loc";
-      if (!f.community.trim()) return "reg.e.comm";
-      if (f.hasHoroscope === null) return "reg.e.horo";
-      if (f.parentContact.length !== 10) return "reg.e.parent";
-    } else if (!f.profilePhoto) return "reg.e.photo";
-    return null;
-  }
+  const validate = () => validateStep(f, step);
 
   async function upload(file: File, main: boolean) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return setErr("reg.e.type");
@@ -127,7 +129,8 @@ export function RegisterClient() {
         body: JSON.stringify({ ...f, parentContact: `+91 ${f.parentContact}` }),
       });
       if (!res.ok) return setErr("err.generic");
-      router.push("/dashboard");
+      router.push(edit ? "/settings" : "/dashboard");
+      router.refresh();
     } catch {
       setErr("err.generic");
     } finally {
@@ -160,9 +163,10 @@ export function RegisterClient() {
     </label>
   );
 
+  const Wrap = edit ? "div" : OutsideScreen;
   return (
-    <OutsideScreen>
-      <h1 className="font-serif text-2xl font-bold text-primary">{t("reg.title")}</h1>
+    <Wrap>
+      <h1 className="font-serif text-2xl font-bold text-primary">{t(edit ? "edit.title" : "reg.title")}</h1>
       <p className="mb-4 text-muted-foreground">{t("reg.step", { n: step, total: TOTAL })}</p>
 
       <div className="mb-6">
@@ -311,10 +315,10 @@ export function RegisterClient() {
           )}
           <button type="button" className="btn btn-primary min-w-0 flex-1 px-3 text-center text-lg" disabled={busy || uploading}
             onClick={step < TOTAL ? next : submit}>
-            {busy ? <span className="spinner" /> : t(step < TOTAL ? "reg.continue" : "reg.submit")}
+            {busy ? <span className="spinner" /> : t(step < TOTAL ? "reg.continue" : edit ? "edit.save" : "reg.submit")}
           </button>
         </div>
       </div>
-    </OutsideScreen>
+    </Wrap>
   );
 }
