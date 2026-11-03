@@ -1,76 +1,42 @@
-import { auth } from "@/lib/auth";
-import { StreamChat } from "stream-chat";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { activeMemberWhere, requireActiveMember } from "@/lib/member";
+import { blockedUserIds } from "@/lib/blocks";
+import { channelIdFor } from "@/lib/chat-rules";
+import { streamServer } from "@/lib/stream";
 
 export async function POST(req: NextRequest) {
+  const m = await requireActiveMember();
+  if (m instanceof NextResponse) return m;
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json().catch(() => null);
+    const otherUserId = body?.otherUserId;
+    if (typeof otherUserId !== "string" || !otherUserId) {
+      return NextResponse.json({ error: "otherUserId is required" }, { status: 400 });
     }
 
-    const { otherUserId } = await req.json();
-
-    if (!otherUserId) {
-      return NextResponse.json(
-        { error: "otherUserId is required" },
-        { status: 400 },
-      );
-    }
-
-    const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY!;
-    const apiSecret = process.env.STREAM_API_SECRET!;
-    const serverClient = StreamChat.getInstance(apiKey, apiSecret);
-
-    // Fetch both users from DB
-    const [currentUser, otherUser] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        include: { profile: true },
-      }),
-      prisma.user.findUnique({
-        where: { id: otherUserId },
-        include: { profile: true },
-      }),
-    ]);
-
-    if (!currentUser || !otherUser) {
+    const other = await prisma.user.findFirst({
+      where: { id: otherUserId, ...activeMemberWhere(new Date()) },
+      include: { profile: true },
+    });
+    const g = other?.profile?.gender;
+    if (!other || !g || !m.gender || g === m.gender || otherUserId === m.id) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+    if ((await blockedUserIds(m.id)).includes(otherUserId)) {
+      return NextResponse.json({ error: "blocked" }, { status: 403 });
+    }
 
-    // Upsert BOTH users in Stream before creating the channel
-    await serverClient.upsertUsers([
-      {
-        id: currentUser.id,
-        name: currentUser.displayName,
-        image: currentUser.profile?.profilePhoto || undefined,
-      },
-      {
-        id: otherUser.id,
-        name: otherUser.displayName,
-        image: otherUser.profile?.profilePhoto || undefined,
-      },
+    const client = streamServer();
+    await client.upsertUsers([
+      { id: m.id, name: m.displayName, image: m.profile?.profilePhoto || undefined },
+      { id: other.id, name: other.displayName, image: other.profile?.profilePhoto || undefined },
     ]);
-
-    // Create a deterministic channel ID
-    const ids = [currentUser.id, otherUser.id].sort();
-    const channelId = `${ids[0]}_${ids[1]}`;
-
-    // Create the channel server-side
-    const channel = serverClient.channel("messaging", channelId, {
-      members: [currentUser.id, otherUser.id],
-      created_by_id: currentUser.id,
-    });
-    await channel.create();
-
+    const channelId = channelIdFor(m.id, other.id);
+    await client.channel("messaging", channelId, { members: [m.id, other.id], created_by_id: m.id }).create();
     return NextResponse.json({ channelId });
   } catch (error) {
     console.error("Error creating chat channel:", error);
-    return NextResponse.json(
-      { error: "Failed to create chat channel" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create chat channel" }, { status: 500 });
   }
 }

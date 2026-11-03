@@ -1,52 +1,22 @@
-import { auth } from "@/lib/auth";
-import { StreamChat } from "stream-chat";
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db";
+import { requireActiveMember } from "@/lib/member";
+import { streamServer } from "@/lib/stream";
 
 export async function GET() {
+  const m = await requireActiveMember();
+  if (m instanceof NextResponse) return m;
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY!;
-    const apiSecret = process.env.STREAM_API_SECRET!;
-
-    const serverClient = StreamChat.getInstance(apiKey, apiSecret);
-
-    // Get user details from DB
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { profile: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Upsert user in Stream so they exist for chat
-    await serverClient.upsertUser({
-      id: user.id,
-      name: user.displayName,
-      image: user.profile?.profilePhoto || undefined,
-    });
-
-    // Generate token
-    const token = serverClient.createToken(user.id);
-
+    const client = streamServer();
+    const image = m.profile?.profilePhoto || undefined;
+    await client.upsertUser({ id: m.id, name: m.displayName, image });
     return NextResponse.json({
-      token,
-      userId: user.id,
-      userName: user.displayName,
-      userImage: user.profile?.profilePhoto || null,
+      token: client.createToken(m.id),
+      userId: m.id,
+      userName: m.displayName,
+      userImage: image ?? null,
     });
   } catch (error) {
     console.error("Error generating Stream token:", error);
-    return NextResponse.json(
-      { error: "Failed to generate chat token" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to generate chat token" }, { status: 500 });
   }
 }

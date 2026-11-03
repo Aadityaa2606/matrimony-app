@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "postinstall": "prisma generate",
+    "stream:setup": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/stream-setup.ts",
     "db:seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
   },
   "prisma": {
