@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { requireActiveMember } from "@/lib/member";
 
 // POST /api/dismissed - Mark profile as dismissed/skipped
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const m = await requireActiveMember();
+    if (m instanceof NextResponse) return m;
 
     const { profileId } = await request.json();
 
@@ -33,12 +30,12 @@ export async function POST(request: NextRequest) {
     await prisma.dismissed.upsert({
       where: {
         userId_profileId: {
-          userId: session.user.id,
+          userId: m.id,
           profileId,
         },
       },
       create: {
-        userId: session.user.id,
+        userId: m.id,
         profileId,
       },
       update: {},

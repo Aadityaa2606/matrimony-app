@@ -1,51 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { activeMemberWhere, requireActiveMember } from "@/lib/member";
+import { blockedUserIds } from "@/lib/blocks";
+import { ageOn } from "@/lib/matching";
 
 // GET /api/favorites - List user's favorite profiles
 export async function GET() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const m = await requireActiveMember();
+    if (m instanceof NextResponse) return m;
 
     const favorites = await prisma.favorite.findMany({
-      where: { userId: session.user.id },
+      where: { userId: m.id },
       orderBy: { createdAt: "desc" },
     });
 
     // Get the profile details for each favorite
     const profileIds = favorites.map((f) => f.profileId);
+    const now = new Date();
+    const blocked = await blockedUserIds(m.id);
     const profiles = await prisma.profile.findMany({
       where: {
         id: { in: profileIds },
+        user: activeMemberWhere(now),
+        userId: { notIn: blocked },
       },
-      include: {
-        user: {
-          select: {
-            displayName: true,
-            status: true,
-          },
-        },
-      },
+      include: { user: { select: { displayName: true } } },
     });
 
-    // Filter only active users and calculate age
     const favoriteProfiles = profiles
-      .filter((p) => p.user.status === "ACTIVE")
       .map((p) => {
-        const birthDate = new Date(p.dateOfBirth);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (
-          monthDiff < 0 ||
-          (monthDiff === 0 && today.getDate() < birthDate.getDate())
-        ) {
-          age--;
-        }
+        const age = ageOn(p.dateOfBirth, now);
 
         return {
           id: p.id,
@@ -76,11 +61,8 @@ export async function GET() {
 // POST /api/favorites - Add profile to favorites
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const m = await requireActiveMember();
+    if (m instanceof NextResponse) return m;
 
     const { profileId } = await request.json();
 
@@ -104,12 +86,12 @@ export async function POST(request: NextRequest) {
     await prisma.favorite.upsert({
       where: {
         userId_profileId: {
-          userId: session.user.id,
+          userId: m.id,
           profileId,
         },
       },
       create: {
-        userId: session.user.id,
+        userId: m.id,
         profileId,
       },
       update: {},
@@ -128,11 +110,8 @@ export async function POST(request: NextRequest) {
 // DELETE /api/favorites - Remove profile from favorites
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const m = await requireActiveMember();
+    if (m instanceof NextResponse) return m;
 
     const { profileId } = await request.json();
 
@@ -146,7 +125,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.favorite.delete({
       where: {
         userId_profileId: {
-          userId: session.user.id,
+          userId: m.id,
           profileId,
         },
       },
