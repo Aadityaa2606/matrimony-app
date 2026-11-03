@@ -186,3 +186,80 @@ export async function deleteChatMessage(messageId: string, channelId: string): P
     return { error: msg(e) };
   }
 }
+
+// ---- Staff management (super admin) ----
+const ROLES = ["VIEWER", "ADMIN", "SUPER_ADMIN"] as const;
+type Role = (typeof ROLES)[number];
+
+async function otherActiveSupers(excludeId: string) {
+  return prisma.staff.count({ where: { role: "SUPER_ADMIN", active: true, id: { not: excludeId } } });
+}
+
+export async function createStaff(formData: FormData): Promise<Result> {
+  const me = await requireStaff("manage_staff");
+  try {
+    const username = String(formData.get("username") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const role = String(formData.get("role") ?? "");
+    if (!/^[a-z0-9_.-]{3,32}$/.test(username)) return { error: "Username must be 3-32 characters: lowercase letters, numbers, . _ -" };
+    if (password.length < 8) return { error: "Password must be at least 8 characters" };
+    if (!ROLES.includes(role as Role)) return { error: "Choose a role" };
+    if (await prisma.staff.findUnique({ where: { username } })) return { error: "That username is already taken" };
+    const s = await prisma.staff.create({ data: { username, passwordHash: await bcrypt.hash(password, 12), role: role as Role } });
+    await logActivity(me.id, "createStaff", undefined, { staffId: s.id, username, role });
+    revalidatePath("/admin/staff");
+    return {};
+  } catch (e) {
+    return { error: msg(e) };
+  }
+}
+
+export async function setStaffActive(staffId: string, active: boolean): Promise<Result> {
+  const me = await requireStaff("manage_staff");
+  try {
+    const s = await prisma.staff.findUnique({ where: { id: staffId } });
+    if (!s) return { error: "Staff not found" };
+    if (!active) {
+      if (s.id === me.id) return { error: "You can't deactivate yourself" };
+      if (s.role === "SUPER_ADMIN" && s.active && (await otherActiveSupers(s.id)) === 0) return { error: "There must be at least one active super admin" };
+    }
+    await prisma.staff.update({ where: { id: staffId }, data: { active } });
+    await logActivity(me.id, "setStaffActive", undefined, { staffId, active });
+    revalidatePath("/admin/staff");
+    return {};
+  } catch (e) {
+    return { error: msg(e) };
+  }
+}
+
+export async function setStaffRole(staffId: string, role: string): Promise<Result> {
+  const me = await requireStaff("manage_staff");
+  try {
+    if (!ROLES.includes(role as Role)) return { error: "Choose a role" };
+    const s = await prisma.staff.findUnique({ where: { id: staffId } });
+    if (!s) return { error: "Staff not found" };
+    if (role !== "SUPER_ADMIN" && s.role === "SUPER_ADMIN") {
+      if (s.id === me.id) return { error: "You can't change your own role" };
+      if (s.active && (await otherActiveSupers(s.id)) === 0) return { error: "There must be at least one active super admin" };
+    }
+    await prisma.staff.update({ where: { id: staffId }, data: { role: role as Role } });
+    await logActivity(me.id, "setStaffRole", undefined, { staffId, role, from: s.role });
+    revalidatePath("/admin/staff");
+    return {};
+  } catch (e) {
+    return { error: msg(e) };
+  }
+}
+
+export async function resetStaffPassword(staffId: string, password: string): Promise<Result> {
+  const me = await requireStaff("manage_staff");
+  try {
+    if (password.length < 8) return { error: "Password must be at least 8 characters" };
+    if (!(await prisma.staff.findUnique({ where: { id: staffId } }))) return { error: "Staff not found" };
+    await prisma.staff.update({ where: { id: staffId }, data: { passwordHash: await bcrypt.hash(password, 12) } });
+    await logActivity(me.id, "resetStaffPassword", undefined, { staffId });
+    return {};
+  } catch (e) {
+    return { error: msg(e) };
+  }
+}
