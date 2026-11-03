@@ -11,7 +11,7 @@ import type { DictKey } from "@/lib/i18n/dict";
 type RzpResponse = { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
 declare global {
   interface Window {
-    Razorpay?: new (o: Record<string, unknown>) => { open(): void; on(e: string, cb: () => void): void };
+    Razorpay?: new (o: Record<string, unknown>) => { open(): void };
   }
 }
 
@@ -20,7 +20,10 @@ export function PaymentClient({ renew, amount }: { renew: boolean; amount: numbe
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<DictKey | null>(null);
 
+  const inFlight = useRef(false);
+
   const fail = (k: DictKey) => {
+    inFlight.current = false;
     setErr(k);
     setBusy(false);
   };
@@ -41,6 +44,8 @@ export function PaymentClient({ renew, amount }: { renew: boolean; amount: numbe
   }
 
   async function pay() {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setErr(null);
     try {
@@ -57,7 +62,6 @@ export function PaymentClient({ renew, amount }: { renew: boolean; amount: numbe
         handler: verify,
         modal: { ondismiss: () => fail("pay.cancelled") },
       });
-      rz.on("payment.failed", () => fail("pay.cancelled"));
       rz.open();
     } catch {
       fail("err.generic");
