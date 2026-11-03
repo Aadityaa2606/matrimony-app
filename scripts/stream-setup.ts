@@ -1,7 +1,7 @@
 process.loadEnvFile(".env");
 import { streamServer } from "../lib/stream";
 
-const BLOCKED = ["create-message", "update-message", "upload-attachment", "create-reaction", "create-reply", "schedule-message"];
+const BLOCKED = ["create-message", "update-message", "upload-attachment", "create-reaction", "create-reply", "schedule-message", "create-channel", "update-channel", "truncate-channel", "delete-channel", "recreate-channel"];
 const ROLES = ["user", "channel_member"];
 
 async function main() {
