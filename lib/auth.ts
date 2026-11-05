@@ -28,6 +28,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return { id: user.id, name: user.displayName };
       },
     }),
+  ],
+  session: { strategy: "jwt" },
+  pages: { signIn: "/sign-in" },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.kind = "member";
+        token.role = undefined;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.kind = token.kind;
+      session.user.role = token.role;
+      return session;
+    },
+  },
+});
+
+// Staff get their own NextAuth instance and cookie, so signing in to the member site in the same
+// browser can't overwrite (and log out) an admin session, and vice versa.
+export const {
+  auth: staffAuth,
+  signIn: staffSignIn,
+  signOut: staffSignOut,
+} = NextAuth({
+  basePath: "/api/staff-auth",
+  providers: [
     Credentials({
       id: "staff",
       name: "Staff",
@@ -48,18 +78,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   session: { strategy: "jwt" },
-  pages: { signIn: "/sign-in" },
+  cookies: { sessionToken: { name: "kv-staff.session-token" } },
+  pages: { signIn: "/admin/login" },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
-        if (account?.provider === "staff") {
-          token.kind = "staff";
-          token.role = (user as { role?: StaffRole }).role;
-        } else {
-          token.kind = "member";
-          token.role = undefined;
-        }
+        token.kind = "staff";
+        token.role = (user as { role?: StaffRole }).role;
       }
       return token;
     },

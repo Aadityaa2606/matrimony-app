@@ -281,3 +281,45 @@ body {
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   margin: 0 auto;
 }
+
+/* ---- Admin panel ---- */
+/* ActionForm: spinner on the submit button while the server action runs */
+form[data-pending] button:not([type="button"])::before {
+  content: "";
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: spin 0.7s linear infinite;
+}
+
+.adm-toast {
+  animation: adm-in 0.2s ease-out;
+}
+
+.adm-dialog[open] {
+  animation: adm-in 0.15s ease-out;
+}
+
+@keyframes adm-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+.skeleton {
+  border-radius: 0.375rem;
+  background: linear-gradient(90deg, #f4f4f5 25%, #e9e9eb 50%, #f4f4f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .adm-toast,
+  .adm-dialog[open] {
+    animation: none;
+  }
+}

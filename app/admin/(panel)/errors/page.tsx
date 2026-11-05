@@ -1,8 +1,9 @@
 import Link from "next/link";
 import prisma from "@/lib/db";
 import { requireStaff } from "@/lib/staff";
+import { Table, PageHeader, fmtDateTime, rupees } from "@/app/admin/_components/ui";
 
-const dt = (d: Date) => d.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+export const metadata = { title: "Errors" };
 
 export default async function Errors() {
   await requireStaff("view_logs");
@@ -11,39 +12,40 @@ export default async function Errors() {
     prisma.errorLog.findMany({ orderBy: { createdAt: "desc" }, take: 200 }),
   ]);
   return (
-    <div>
-      <h1 className="mb-4 text-xl font-semibold">Failed payments ({failed.length})</h1>
-      <table className="mb-8 w-full border text-left">
-        <thead><tr className="border-b"><th className="p-2">When</th><th className="p-2">Member</th><th className="p-2">Amount</th><th className="p-2">Reason</th></tr></thead>
-        <tbody>
+    <div className="grid gap-10">
+      <div>
+        <PageHeader title="Failed payments" sub={`${failed.length} most recent`} />
+        <Table head={["When", "Member", "Amount", "Reason"]} empty={failed.length === 0 && "No failed payments"}>
           {failed.map((x) => (
-            <tr key={x.id} className="border-b">
-              <td className="p-2">{dt(x.createdAt)}</td>
-              <td className="p-2"><Link href={`/admin/users/${x.userId}`} className="underline">{x.user.displayName}</Link></td>
-              <td className="p-2">₹{x.amountPaise / 100}</td>
-              <td className="p-2">{x.failureReason ?? "-"}</td>
+            <tr key={x.id}>
+              <td className="whitespace-nowrap text-zinc-600">{fmtDateTime(x.createdAt)}</td>
+              <td><Link href={`/admin/users/${x.userId}`} className="font-medium hover:underline">{x.user.displayName}</Link></td>
+              <td className="tabular-nums">{rupees(x.amountPaise)}</td>
+              <td className="text-rose-600">{x.failureReason ?? "—"}</td>
             </tr>
           ))}
-          {failed.length === 0 && <tr><td className="p-2" colSpan={4}>No failed payments</td></tr>}
-        </tbody>
-      </table>
-      <h1 className="mb-4 text-xl font-semibold">Errors (latest 200)</h1>
-      <table className="w-full border text-left">
-        <thead><tr className="border-b"><th className="p-2">When</th><th className="p-2">Where</th><th className="p-2">Message</th><th className="p-2">Details</th></tr></thead>
-        <tbody>
+        </Table>
+      </div>
+      <div>
+        <PageHeader title="Errors" sub="Latest 200" />
+        <Table head={["When", "Where", "Message", "Details"]} empty={errors.length === 0 && "No errors"}>
           {errors.map((e) => (
-            <tr key={e.id} className="border-b align-top">
-              <td className="p-2">{dt(e.createdAt)}</td>
-              <td className="p-2">{e.context}</td>
-              <td className="p-2">{e.message}</td>
-              <td className="p-2">
-                {e.details ? <details><summary className="cursor-pointer underline">Show</summary><pre className="mt-1 whitespace-pre-wrap text-sm">{JSON.stringify(e.details, null, 2)}</pre></details> : "-"}
+            <tr key={e.id} className="align-top">
+              <td className="whitespace-nowrap text-zinc-600">{fmtDateTime(e.createdAt)}</td>
+              <td><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs">{e.context}</code></td>
+              <td className="max-w-md">{e.message}</td>
+              <td>
+                {e.details ? (
+                  <details>
+                    <summary className="cursor-pointer text-xs font-medium text-zinc-600 hover:text-zinc-900">Show</summary>
+                    <pre className="mt-2 max-w-md overflow-x-auto whitespace-pre-wrap rounded-lg bg-zinc-50 p-2 text-xs">{JSON.stringify(e.details, null, 2)}</pre>
+                  </details>
+                ) : "—"}
               </td>
             </tr>
           ))}
-          {errors.length === 0 && <tr><td className="p-2" colSpan={4}>No errors</td></tr>}
-        </tbody>
-      </table>
+        </Table>
+      </div>
     </div>
   );
 }

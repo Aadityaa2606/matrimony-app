@@ -2,6 +2,8 @@
 
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { AuthError } from "next-auth";
+import { staffSignIn } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { requireStaff, logActivity } from "@/lib/staff";
 import { TransitionError, approve, reject, suspend, unsuspend, type Change, type LifecycleUser } from "@/lib/lifecycle";
@@ -12,6 +14,16 @@ import { normalizePhone } from "@/lib/phone";
 import { streamServer } from "@/lib/stream";
 
 type Result = { error?: string };
+
+export async function staffLogin(_prev: unknown, fd: FormData): Promise<{ error: string; username: string } | undefined> {
+  try {
+    await staffSignIn("staff", { username: fd.get("username"), password: fd.get("password"), redirectTo: "/admin" });
+  } catch (e) {
+    // username goes back so the form (which React resets after an action) can keep it filled in
+    if (e instanceof AuthError) return { error: "Invalid username or password", username: String(fd.get("username") ?? "") };
+    throw e; // the success redirect
+  }
+}
 const msg = (e: unknown) => (e instanceof TransitionError || e instanceof ImageError ? e.message : e instanceof Error ? e.message : "Something went wrong");
 
 function refresh(userId: string) {

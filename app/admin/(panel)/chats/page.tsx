@@ -2,6 +2,9 @@ import Link from "next/link";
 import prisma from "@/lib/db";
 import { requireStaff } from "@/lib/staff";
 import { streamServer } from "@/lib/stream";
+import { Avatar, Empty, Icon, PageHeader, SearchBox, Table, card, fmtDateTime } from "@/app/admin/_components/ui";
+
+export const metadata = { title: "Chats" };
 
 export default async function Chats({ searchParams }: { searchParams: Promise<{ userId?: string; q?: string }> }) {
   await requireStaff("view");
@@ -23,38 +26,56 @@ export default async function Chats({ searchParams }: { searchParams: Promise<{ 
   const owner = userId ? await prisma.user.findUnique({ where: { id: userId } }) : null;
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Chats</h1>
-      <form className="mb-4 flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Name or phone" className="rounded border p-1" />
-        <button className="rounded border px-3">Search</button>
-      </form>
-      {found.length > 0 && (
-        <ul className="mb-4">
-          {found.map((u) => (
-            <li key={u.id}><Link href={`/admin/chats?userId=${u.id}`} className="underline">{u.displayName}</Link> {u.phoneNumber}</li>
-          ))}
-        </ul>
+      <PageHeader title="Chats" sub="Find a member to read their conversations." />
+      <SearchBox q={q} placeholder="Search name or phone" />
+      {term && (
+        <div className={`${card} mb-6 overflow-hidden`}>
+          {found.length === 0 ? (
+            <Empty text={`No members match “${term}”`} />
+          ) : (
+            <ul className="divide-y divide-zinc-100">
+              {found.map((u) => (
+                <li key={u.id}>
+                  <Link
+                    href={`/admin/chats?${new URLSearchParams({ userId: u.id, q })}`}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-zinc-50 ${u.id === userId ? "bg-zinc-50" : ""}`}
+                  >
+                    <Avatar name={u.displayName} />
+                    <span className="flex-1">
+                      <span className="block font-medium">{u.displayName}</span>
+                      <span className="block text-xs text-zinc-500">{u.phoneNumber}</span>
+                    </span>
+                    {u.id === userId ? <Icon name="check" className="size-4 text-emerald-600" /> : <Icon name="right" className="size-4 text-zinc-400" />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
       {userId && (
         <>
-          <h2 className="mb-2 font-semibold">Chats of {owner?.displayName ?? userId}</h2>
-          <table className="w-full border text-left">
-            <thead><tr className="border-b"><th className="p-2">With</th><th className="p-2">Phone</th><th className="p-2">Last message</th><th className="p-2">Time</th></tr></thead>
-            <tbody>
-              {rows.map((r) => {
-                const o = byId.get(r.otherId);
-                return (
-                  <tr key={r.id} className="border-b">
-                    <td className="p-2"><Link href={`/admin/chats/${r.id}`} className="underline">{o?.displayName ?? r.otherId}</Link></td>
-                    <td className="p-2">{o?.phoneNumber ?? "-"}</td>
-                    <td className="p-2">{r.last?.type === "deleted" ? <i>removed by admin</i> : r.last?.text ?? "-"}</td>
-                    <td className="p-2">{r.at ? new Date(r.at).toLocaleString("en-IN") : "-"}</td>
-                  </tr>
-                );
-              })}
-              {rows.length === 0 && <tr><td className="p-2" colSpan={4}>No chats</td></tr>}
-            </tbody>
-          </table>
+          <h2 className="mb-3 text-sm font-semibold">Conversations of {owner?.displayName ?? userId}</h2>
+          <Table head={["With", "Last message", "Time"]} empty={rows.length === 0 && "No conversations yet"}>
+            {rows.map((r) => {
+              const o = byId.get(r.otherId);
+              return (
+                <tr key={r.id}>
+                  <td>
+                    <Link href={`/admin/chats/${r.id}`} className="flex items-center gap-3">
+                      <Avatar name={o?.displayName ?? "?"} />
+                      <span>
+                        <span className="block font-medium hover:underline">{o?.displayName ?? r.otherId}</span>
+                        <span className="block text-xs text-zinc-500">{o?.phoneNumber}</span>
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="max-w-xs truncate text-zinc-600">{r.last?.type === "deleted" ? <i>removed by admin</i> : r.last?.text ?? "—"}</td>
+                  <td className="whitespace-nowrap text-zinc-600">{r.at ? fmtDateTime(new Date(r.at)) : "—"}</td>
+                </tr>
+              );
+            })}
+          </Table>
         </>
       )}
     </div>

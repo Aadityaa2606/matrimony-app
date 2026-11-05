@@ -1,5 +1,12 @@
+import Link from "next/link";
 import prisma from "@/lib/db";
 import { requireStaff } from "@/lib/staff";
+import { PageHeader, Table, btn, fmtDateTime, input } from "@/app/admin/_components/ui";
+
+export const metadata = { title: "Activity" };
+
+// "approveUser" -> "Approve user"
+const human = (a: string) => a.replace(/([A-Z])/g, " $1").toLowerCase().replace(/^./, (c) => c.toUpperCase());
 
 export default async function Activity({ searchParams }: { searchParams: Promise<{ staff?: string; action?: string }> }) {
   await requireStaff("view_logs");
@@ -19,33 +26,34 @@ export default async function Activity({ searchParams }: { searchParams: Promise
   const userName = new Map(users.map((u) => [u.id, u.displayName]));
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Activity (latest 200)</h1>
-      <form className="mb-4 flex gap-2">
-        <select name="staff" defaultValue={staff} className="rounded border p-1">
+      <PageHeader title="Activity" sub="Latest 200 staff actions." />
+      <form className="mb-4 flex flex-wrap gap-2">
+        <select name="staff" defaultValue={staff} className={`${input} w-auto`}>
           <option value="">All staff</option>
           {staffList.map((s) => <option key={s.id} value={s.id}>{s.username}</option>)}
         </select>
-        <select name="action" defaultValue={action} className="rounded border p-1">
+        <select name="action" defaultValue={action} className={`${input} w-auto`}>
           <option value="">All actions</option>
-          {actions.map((a) => <option key={a.action}>{a.action}</option>)}
+          {actions.map((a) => <option key={a.action} value={a.action}>{human(a.action)}</option>)}
         </select>
-        <button className="rounded border px-3">Filter</button>
+        <button className={btn.secondary}>Filter</button>
+        {(staff || action) && <Link href="/admin/activity" className={btn.ghost}>Clear</Link>}
       </form>
-      <table className="w-full border text-left">
-        <thead><tr className="border-b"><th className="p-2">When</th><th className="p-2">Staff</th><th className="p-2">Action</th><th className="p-2">Member</th><th className="p-2">Details</th></tr></thead>
-        <tbody>
-          {logs.map((l) => (
-            <tr key={l.id} className="border-b align-top">
-              <td className="p-2">{l.createdAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</td>
-              <td className="p-2">{staffName.get(l.staffId) ?? l.staffId}</td>
-              <td className="p-2">{l.action}</td>
-              <td className="p-2">{l.targetUserId ? userName.get(l.targetUserId) ?? l.targetUserId : "-"}</td>
-              <td className="p-2 font-mono text-sm">{l.details ? JSON.stringify(l.details) : "-"}</td>
-            </tr>
-          ))}
-          {logs.length === 0 && <tr><td className="p-2" colSpan={5}>No activity</td></tr>}
-        </tbody>
-      </table>
+      <Table head={["When", "Staff", "Action", "Member", "Details"]} empty={logs.length === 0 && "No activity"}>
+        {logs.map((l) => (
+          <tr key={l.id} className="align-top">
+            <td className="whitespace-nowrap text-zinc-600">{fmtDateTime(l.createdAt)}</td>
+            <td className="font-medium">{staffName.get(l.staffId) ?? l.staffId}</td>
+            <td className="whitespace-nowrap">{human(l.action)}</td>
+            <td>
+              {l.targetUserId ? (
+                <Link href={`/admin/users/${l.targetUserId}`} className="hover:underline">{userName.get(l.targetUserId) ?? l.targetUserId}</Link>
+              ) : "—"}
+            </td>
+            <td className="max-w-sm break-all font-mono text-xs text-zinc-500">{l.details ? JSON.stringify(l.details) : "—"}</td>
+          </tr>
+        ))}
+      </Table>
     </div>
   );
 }
