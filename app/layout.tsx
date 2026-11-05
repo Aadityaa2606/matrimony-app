@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Tamil, Noto_Serif_Tamil } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { getLang } from "@/lib/i18n/server";
@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "Kalyana Varan Matrimony",
   description: "Kalyana Varan Matrimony - find your life partner",
 };
+
+// viewport-fit=cover lets the bottom nav pad itself above the iPhone home bar (env(safe-area-inset-bottom)).
+export const viewport: Viewport = { themeColor: "#fcf8f0", viewportFit: "cover" };
 
 export default async function RootLayout({
   children,

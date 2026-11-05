@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ProfileCard, type ProfileCardData } from "@/components/ProfileCard";
+import { useCallback, useEffect, useState } from "react";
+import { ListSkeleton, ProfileCard, type ProfileCardData } from "@/components/ProfileCard";
 import { useT } from "@/components/LanguageProvider";
 import { errorKey } from "@/lib/i18n/errors";
 
@@ -11,15 +11,25 @@ export default function HomePage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     fetch("/api/profiles")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
       .then((d) => setProfiles(d.profiles ?? []))
       .catch(() => {
         setProfiles([]);
         setFailed(true);
       });
   }, []);
+  useEffect(load, [load]);
+
+  function retry() {
+    setFailed(false);
+    setProfiles(null);
+    load();
+  }
 
   async function act(url: string, profileId: string) {
     setBusy(profileId);
@@ -39,13 +49,7 @@ export default function HomePage() {
     }
   }
 
-  if (!profiles) {
-    return (
-      <div className="flex justify-center py-20">
-        <span className="spinner h-8 w-8 text-primary" />
-      </div>
-    );
-  }
+  if (!profiles) return <ListSkeleton />;
 
   return (
     <main className="mx-auto max-w-md px-4 pt-2">
@@ -53,7 +57,12 @@ export default function HomePage() {
         <h1 className="font-serif text-lg font-bold text-primary">{t("home.title")}</h1>
         <span className="shrink-0 text-sm text-muted-foreground">{t("home.count", { n: profiles.length })}</span>
       </div>
-      {failed && <p role="alert" className="mb-3 font-medium text-error">{t(errorKey())}</p>}
+      {failed && (
+        <div role="alert" className="mb-4 flex items-center justify-between gap-3 rounded-[14px] bg-error/10 px-4 py-3 font-medium text-error">
+          <span>{t(errorKey())}</span>
+          <button onClick={retry} className="min-h-12 shrink-0 font-semibold underline">{t("common.retry")}</button>
+        </div>
+      )}
       {profiles.length === 0 ? (
         <div className="rounded-[18px] bg-white p-8 text-center shadow-[0_4px_16px_rgba(120,80,20,.08)]">
           <h2 className="font-serif text-lg font-bold">{t("home.empty.title")}</h2>

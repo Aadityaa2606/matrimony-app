@@ -7,11 +7,13 @@ import { StreamChat } from "stream-chat";
 interface ChatContextType {
   client: StreamChat | null;
   isReady: boolean;
+  failed: boolean; // connecting failed; chat screens show an error instead of spinning forever
 }
 
 const ChatContext = createContext<ChatContextType>({
   client: null,
   isReady: false,
+  failed: false,
 });
 
 export const useChatClient = () => useContext(ChatContext);
@@ -20,6 +22,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [client, setClient] = useState<StreamChat | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated" || !session?.user?.id) return;
@@ -32,7 +35,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/chat/token");
         const data = await res.json();
 
-        if (!res.ok || didCancel) return;
+        if (didCancel) return;
+        if (!res.ok) return setFailed(true);
 
         chatClient = StreamChat.getInstance(
           process.env.NEXT_PUBLIC_STREAM_API_KEY!,
@@ -50,9 +54,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         if (!didCancel) {
           setClient(chatClient);
           setIsReady(true);
+          setFailed(false);
         }
       } catch (error) {
         console.error("Failed to initialize Stream Chat:", error);
+        if (!didCancel) setFailed(true);
       }
     };
 
@@ -70,7 +76,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [session?.user?.id, status]);
 
   return (
-    <ChatContext.Provider value={{ client, isReady }}>
+    <ChatContext.Provider value={{ client, isReady, failed }}>
       {children}
     </ChatContext.Provider>
   );

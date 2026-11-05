@@ -30,8 +30,8 @@ export default function MainShell({
   );
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="relative">
+    <div className="min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md">
         <Garland variant="thin" />
         <div className="relative mx-auto flex max-w-2xl items-center justify-between px-4 pb-2 pt-3">
           <Brand size="sm" />
@@ -50,7 +50,7 @@ export default function MainShell({
 
       {children}
 
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-white shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(120,80,20,.06)] backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-2xl items-stretch justify-around px-2">
           {navItems.map((item) => {
             const active = pathname.startsWith(item.href);
@@ -58,14 +58,21 @@ export default function MainShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex min-w-16 flex-1 flex-col items-center justify-center border-b-4 text-xs font-semibold ${
-                  active ? "border-accent text-primary" : "border-transparent text-muted-foreground"
+                aria-current={active ? "page" : undefined}
+                className={`group flex min-w-16 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-primary"
                 }`}
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d={item.d} />
-                </svg>
-                <span className="mt-0.5">{t(item.label)}</span>
+                <span
+                  className={`flex h-8 w-14 items-center justify-center rounded-full transition-all duration-200 ${
+                    active ? "bg-accent/20" : "group-active:scale-90"
+                  }`}
+                >
+                  <svg className="h-6 w-6" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.12 : 0} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={item.d} />
+                  </svg>
+                </span>
+                <span>{t(item.label)}</span>
               </Link>
             );
           })}

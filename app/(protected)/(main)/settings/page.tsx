@@ -23,6 +23,8 @@ export default function SettingsPage() {
   const [next, setNext] = useState("");
   const [pwMsg, setPwMsg] = useState<{ key: DictKey; ok: boolean } | null>(null);
   const [pwBusy, setPwBusy] = useState(false);
+  const [unblocking, setUnblocking] = useState<string | null>(null);
+  const [unblockFailed, setUnblockFailed] = useState(false);
 
   useEffect(() => {
     fetch("/api/profile").then((r) => r.json()).then((d) => setMe(d.profile ?? null)).catch(() => {});
@@ -31,12 +33,16 @@ export default function SettingsPage() {
   }, []);
 
   async function unblock(userId: string) {
+    setUnblocking(userId);
+    setUnblockFailed(false);
     const res = await fetch("/api/blocks", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
     }).catch(() => null);
+    setUnblocking(null);
     if (res?.ok) setBlocked((b) => b.filter((x) => x.userId !== userId));
+    else setUnblockFailed(true);
   }
 
   async function changePassword(e: React.FormEvent) {
@@ -73,12 +79,21 @@ export default function SettingsPage() {
       <h1 className="font-serif text-xl font-bold text-primary">{t("settings.title")}</h1>
 
       <div className={`${card} flex items-center gap-4`}>
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-accent bg-muted">
+        <div className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-accent bg-muted ${me ? "" : "skeleton"}`}>
           {me?.profilePhoto && <Image src={me.profilePhoto} alt="" fill sizes="80px" className="object-cover" />}
         </div>
-        <div className="min-w-0">
-          <h2 className="font-serif text-lg font-bold">{me?.fullName}</h2>
-          {me && <p className="text-sm text-muted-foreground">{me.location} · {me.community}</p>}
+        <div className="min-w-0 flex-1">
+          {me ? (
+            <>
+              <h2 className="font-serif text-lg font-bold">{me.fullName}</h2>
+              <p className="text-sm text-muted-foreground">{me.location} · {me.community}</p>
+            </>
+          ) : (
+            <div aria-hidden className="space-y-2">
+              <div className="skeleton h-5 w-2/3" />
+              <div className="skeleton h-4 w-1/2" />
+            </div>
+          )}
           <span className="mt-1 inline-block rounded-full bg-[#e6f2e8] px-2.5 py-1 text-xs font-bold text-success">
             ✓ {t("settings.verified")}
           </span>
@@ -121,13 +136,14 @@ export default function SettingsPage() {
                   {b.photo && <Image src={b.photo} alt="" fill sizes="48px" className="object-cover" />}
                 </div>
                 <span className="min-w-0 flex-1 truncate font-semibold">{b.name}</span>
-                <button onClick={() => unblock(b.userId)} className="btn btn-outline min-h-12 px-3 py-2">
-                  {t("settings.unblock")}
+                <button onClick={() => unblock(b.userId)} disabled={unblocking === b.userId} className="btn btn-outline min-h-12 px-3 py-2">
+                  {unblocking === b.userId ? <span className="spinner" /> : t("settings.unblock")}
                 </button>
               </li>
             ))}
           </ul>
         )}
+        {unblockFailed && <p role="alert" className="mt-3 font-medium text-error">{t("err.generic")}</p>}
       </section>
 
       <button onClick={() => signOut({ callbackUrl: "/welcome" })} className="btn btn-outline w-full border-error text-error">

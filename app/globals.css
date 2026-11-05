@@ -282,6 +282,20 @@ body {
   margin: 0 auto;
 }
 
+/* Pressed feedback and visible keyboard focus on every button (member site + admin) */
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
 /* ---- Admin panel ---- */
 /* ActionForm: spinner on the submit button while the server action runs */
 form[data-pending] button:not([type="button"])::before {
@@ -309,9 +323,10 @@ form[data-pending] button:not([type="button"])::before {
   }
 }
 
+/* Warm on the member site; the admin root overrides --sk-a/--sk-b with greys. */
 .skeleton {
   border-radius: 0.375rem;
-  background: linear-gradient(90deg, #f4f4f5 25%, #e9e9eb 50%, #f4f4f5 75%);
+  background: linear-gradient(90deg, var(--sk-a, #f1e8d6) 25%, var(--sk-b, #f8f2e6) 50%, var(--sk-a, #f1e8d6) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }

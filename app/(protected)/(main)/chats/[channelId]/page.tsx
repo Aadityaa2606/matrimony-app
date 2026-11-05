@@ -34,7 +34,7 @@ export default function ChatPage() {
   const router = useRouter();
   const params = useParams();
   const { t, lang } = useT();
-  const { client, isReady } = useChatClient();
+  const { client, isReady, failed } = useChatClient();
   const [channel, setChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -184,10 +184,18 @@ export default function ChatPage() {
     }
   };
 
+  if (failed) {
+    return (
+      <div role="alert" className="mx-auto max-w-md px-4 py-16 text-center">
+        <p className="mb-4 text-base text-error">{t("err.generic")}</p>
+        <button onClick={() => window.location.reload()} className="btn btn-primary">{t("common.retry")}</button>
+      </div>
+    );
+  }
   if (status === "loading" || !isReady || loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <span className="spinner w-8 h-8 border-primary" />
+      <div aria-busy="true" className="flex items-center justify-center py-24">
+        <span className="spinner h-8 w-8 text-primary" />
       </div>
     );
   }
@@ -200,7 +208,7 @@ export default function ChatPage() {
   const notice = reason && NOTICES.includes(reason) ? t(`chat.${reason}` as DictKey) : null;
 
   return (
-    <div className="fixed inset-x-0 bottom-16 top-0 z-40 flex flex-col bg-background">
+    <div className="fixed inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-2xl flex-col bg-background sm:border-x sm:border-border">
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-white px-2 py-2">
         <button
           onClick={() => router.push("/chats")}
@@ -233,8 +241,9 @@ export default function ChatPage() {
               <circle cx="12" cy="19" r="2" />
             </svg>
           </button>
+          {menuOpen && <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />}
           {menuOpen && (
-            <div className="absolute right-0 top-12 z-10 w-56 rounded-[14px] border border-border bg-white py-1 shadow-lg">
+            <div className="absolute right-0 top-12 z-20 w-56 rounded-[14px] border border-border bg-white py-1 shadow-lg">
               {chatState && !chatState.iBlocked && (
                 <button
                   onClick={() => {
@@ -269,7 +278,7 @@ export default function ChatPage() {
           messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.isMine ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] rounded-[18px] px-4 py-2 ${
+                className={`animate-fade-in max-w-[80%] rounded-[18px] px-4 py-2 shadow-sm ${
                   msg.deleted
                     ? "border border-border bg-muted text-muted-foreground"
                     : msg.isMine

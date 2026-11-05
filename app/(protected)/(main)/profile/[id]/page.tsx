@@ -93,9 +93,22 @@ export default function ProfileDetailPage() {
 
   if (!p) {
     return (
-      <div className="flex justify-center py-20">
-        <span className="spinner h-8 w-8 text-primary" />
-      </div>
+      <main aria-busy="true" className="mx-auto max-w-md space-y-4 px-4 pt-2">
+        <div className="flex justify-between">
+          <div className="skeleton h-12 w-24 rounded-xl" />
+          <div className="skeleton h-12 w-32 rounded-xl" />
+        </div>
+        <div className="overflow-hidden rounded-[18px] bg-white">
+          <div className="skeleton aspect-4/5 rounded-none" />
+          <div className="flex flex-col items-center gap-2 p-4">
+            <div className="skeleton h-7 w-1/2" />
+            <div className="skeleton h-4 w-2/3" />
+          </div>
+        </div>
+        <div className={`${card} grid grid-cols-2 gap-3`}>
+          {[0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}
+        </div>
+      </main>
     );
   }
 
@@ -120,9 +133,9 @@ export default function ProfileDetailPage() {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-[18px] bg-white shadow-[0_4px_16px_rgba(120,80,20,.08)]">
+      <div className="animate-fade-in overflow-hidden rounded-[18px] bg-white shadow-[0_4px_16px_rgba(120,80,20,.08)]">
         <div className="relative aspect-4/5 bg-muted">
-          <Image src={photos[photo]} alt={p.fullName} fill sizes="(max-width: 448px) 100vw, 448px" className="object-cover" />
+          <Image key={photos[photo]} src={photos[photo]} alt={p.fullName} fill sizes="(max-width: 448px) 100vw, 448px" className="animate-fade-in object-cover" />
         </div>
         {photos.length > 1 && (
           <div className="flex justify-center gap-1 p-2">

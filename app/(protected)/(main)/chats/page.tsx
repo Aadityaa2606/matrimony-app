@@ -11,9 +11,10 @@ export default function ChatsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useT();
-  const { client, isReady } = useChatClient();
+  const { client, isReady, failed } = useChatClient();
   const [channels, setChannels] = useState<ChannelType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -38,8 +39,10 @@ export default function ChatsPage() {
           limit: 30,
         });
         setChannels(result);
+        setLoadFailed(false);
       } catch (error) {
         console.error("Error loading channels:", error);
+        setLoadFailed(true);
       } finally {
         setLoading(false);
       }
@@ -60,14 +63,34 @@ export default function ChatsPage() {
     };
   }, [isReady, client, session?.user?.id]);
 
+  if (failed || (loadFailed && channels.length === 0)) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 pt-2">
+        <div role="alert" className="card py-10 text-center">
+          <p className="mb-4 text-base text-error">{t("err.generic")}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">{t("common.retry")}</button>
+        </div>
+      </main>
+    );
+  }
+
   if (status === "loading" || !isReady || loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <span className="spinner w-8 h-8 border-primary" />
-          <p className="text-base text-muted-foreground">{t("chat.loading")}</p>
+      <main aria-busy="true" aria-label={t("chat.loading")} className="mx-auto max-w-2xl px-4 pt-2">
+        <div className="skeleton mb-2 h-7 w-32" />
+        <div className="skeleton mb-5 h-4 w-56" />
+        <div className="space-y-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-3 rounded-[18px] border border-border bg-white p-3">
+              <div className="skeleton h-14 w-14 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-4 w-1/2" />
+                <div className="skeleton h-4 w-3/4" />
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -137,7 +160,7 @@ function ChannelPreview({
   return (
     <button
       onClick={onClick}
-      className="flex min-h-16 w-full items-center gap-3 rounded-[18px] border border-border bg-white p-3 text-left shadow-sm"
+      className="animate-fade-in flex min-h-16 w-full items-center gap-3 rounded-[18px] border border-border bg-white p-3 text-left shadow-sm transition hover:border-accent hover:shadow-md active:scale-[.99]"
     >
       {/* Avatar */}
       <div className="relative shrink-0">
@@ -161,7 +184,7 @@ function ChannelPreview({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="font-semibold text-foreground truncate">
+          <h3 className={`truncate text-foreground ${unreadCount > 0 ? "font-bold" : "font-semibold"}`}>
             {(otherUser?.name as string) || t("chat.unknown")}
           </h3>
           <span className="text-xs text-muted-foreground shrink-0 ml-2">
@@ -173,7 +196,7 @@ function ChannelPreview({
             {lastMessage?.type === "deleted" ? t("chat.removedByAdmin") : lastMessage?.text || t("chat.noMessages")}
           </p>
           {unreadCount > 0 && (
-            <span className="shrink-0 ml-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
+            <span className="ml-2 flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-white">
               {unreadCount}
             </span>
           )}
