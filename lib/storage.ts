@@ -27,11 +27,14 @@ export async function storeImage(file: File, prefix: string): Promise<string> {
     service: "s3",
     region: "auto",
   });
-  const res = await r2.fetch(`${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET}/${key}`, {
+  const bytes = new Uint8Array(body);
+  // Sign only: r2.fetch re-wraps the body as a stream, dropping Content-Length (R2 → 411).
+  const signed = await r2.sign(`${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET}/${key}`, {
     method: "PUT",
-    body: new Uint8Array(body),
+    body: bytes,
     headers: { "content-type": "image/webp" },
   });
+  const res = await fetch(signed.url, { method: "PUT", headers: signed.headers, body: bytes });
   if (!res.ok) throw new Error(`R2 upload failed: ${res.status}`);
   return `${process.env.R2_PUBLIC_URL}/${key}`;
 }
