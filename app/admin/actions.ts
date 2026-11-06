@@ -20,7 +20,12 @@ export async function staffLogin(_prev: unknown, fd: FormData): Promise<{ error:
     await staffSignIn("staff", { username: fd.get("username"), password: fd.get("password"), redirectTo: "/admin" });
   } catch (e) {
     // username goes back so the form (which React resets after an action) can keep it filled in
-    if (e instanceof AuthError) return { error: "Invalid username or password", username: String(fd.get("username") ?? "") };
+    if (e instanceof AuthError) {
+      const username = String(fd.get("username") ?? "");
+      if (e.type === "CredentialsSignin") return { error: "Invalid username or password", username };
+      console.error("staff sign-in failed", e); // a server/DB problem, not a wrong password
+      return { error: "Sign-in failed because of a server problem. Please try again.", username };
+    }
     throw e; // the success redirect
   }
 }
@@ -210,7 +215,7 @@ async function otherActiveSupers(excludeId: string) {
 export async function createStaff(formData: FormData): Promise<Result> {
   const me = await requireStaff("manage_staff");
   try {
-    const username = String(formData.get("username") ?? "").trim();
+    const username = String(formData.get("username") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
     const role = String(formData.get("role") ?? "");
     if (!/^[a-z0-9_.-]{3,32}$/.test(username)) return { error: "Username must be 3-32 characters: lowercase letters, numbers, . _ -" };

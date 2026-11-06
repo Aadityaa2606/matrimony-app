@@ -17,7 +17,7 @@ export default async function StaffPage() {
       <section className={`${card} mb-6`}>
         <h2 className="border-b border-zinc-100 px-5 py-3.5 text-sm font-semibold">Add staff member</h2>
         <ActionForm action={createStaff} success="Staff member added" resetOnSuccess className="grid items-end gap-3 p-5 sm:grid-cols-[1fr_1fr_10rem_auto]">
-          <label className={label}>Username<input name="username" autoComplete="off" placeholder="e.g. priya" required className={input} /></label>
+          <label className={label}>Username<input name="username" autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="e.g. priya" required className={input} /></label>
           <label className={label}>Password<input name="password" type="password" autoComplete="new-password" placeholder="8+ characters" required minLength={8} className={input} /></label>
           <label className={label}>
             Role

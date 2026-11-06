@@ -66,7 +66,8 @@ export const {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const username = String(credentials?.username ?? "").trim();
+        // Usernames are stored lowercase; phones and password managers often capitalise the first letter.
+        const username = String(credentials?.username ?? "").trim().toLowerCase();
         const password = String(credentials?.password ?? "");
         if (!username || !password) return null;
         const staff = await prisma.staff.findUnique({ where: { username } });
