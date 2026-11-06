@@ -5,7 +5,7 @@ export default async function EditProfilePage() {
   const p = (await getMember())?.profile;
   if (!p) return null; // layout already gates on an ACTIVE member, who always has a profile
   return (
-    <div className="mx-auto max-w-md px-6 py-6">
+    <div className="mx-auto max-w-md px-4 pb-6 pt-2">
       <RegisterClient
         edit
         initial={{

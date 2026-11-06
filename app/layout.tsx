@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 // viewport-fit=cover lets the bottom nav pad itself above the iPhone home bar (env(safe-area-inset-bottom)).
-export const viewport: Viewport = { themeColor: "#fcf8f0", viewportFit: "cover" };
+export const viewport: Viewport = { themeColor: "#7d1828", viewportFit: "cover" };
 
 export default async function RootLayout({
   children,

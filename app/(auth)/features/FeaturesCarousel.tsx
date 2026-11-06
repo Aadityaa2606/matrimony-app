@@ -29,7 +29,7 @@ export function FeaturesCarousel({ amount }: { amount: number }) {
       >
         {SLIDES.map((s) => (
           <section key={s.title} className="flex w-full shrink-0 snap-center flex-col items-center gap-4 px-2 py-6 text-center">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-accent bg-white text-4xl text-primary">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-accent/60 bg-[radial-gradient(circle,#fffdf8_55%,#f6ead0)] text-4xl text-primary shadow-[0_4px_14px_rgba(120,80,20,.12)]">
               {s.icon}
             </div>
             <h1 className="font-serif text-2xl font-bold text-primary">{t(s.title, { amount })}</h1>

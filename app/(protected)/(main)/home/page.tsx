@@ -64,7 +64,7 @@ export default function HomePage() {
         </div>
       )}
       {profiles.length === 0 ? (
-        <div className="rounded-[18px] bg-white p-8 text-center shadow-[0_4px_16px_rgba(120,80,20,.08)]">
+        <div className="panel p-8 text-center">
           <h2 className="font-serif text-lg font-bold">{t("home.empty.title")}</h2>
           <p className="mt-2 text-muted-foreground">{t("home.empty.body")}</p>
         </div>

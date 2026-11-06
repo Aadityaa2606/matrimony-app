@@ -65,7 +65,7 @@ export default function FavoritesPage() {
         </div>
       )}
       {favs.length === 0 ? (
-        <div className="rounded-[18px] bg-white p-8 text-center shadow-[0_4px_16px_rgba(120,80,20,.08)]">
+        <div className="panel p-8 text-center">
           <h2 className="font-serif text-lg font-bold">{t("fav.empty.title")}</h2>
           <p className="mb-4 mt-2 text-muted-foreground">{t("fav.empty.body")}</p>
           <Link href="/home" className="btn btn-primary">{t("fav.browse")}</Link>

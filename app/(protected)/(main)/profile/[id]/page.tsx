@@ -27,7 +27,7 @@ type Detail = {
   additionalPhotos: string[];
 };
 
-const card = "rounded-[18px] bg-white p-4 shadow-[0_4px_16px_rgba(120,80,20,.08)]";
+const card = "panel p-4";
 
 export default function ProfileDetailPage() {
   const { t } = useT();
@@ -98,7 +98,7 @@ export default function ProfileDetailPage() {
           <div className="skeleton h-12 w-24 rounded-xl" />
           <div className="skeleton h-12 w-32 rounded-xl" />
         </div>
-        <div className="overflow-hidden rounded-[18px] bg-white">
+        <div className="panel overflow-hidden">
           <div className="skeleton aspect-4/5 rounded-none" />
           <div className="flex flex-col items-center gap-2 p-4">
             <div className="skeleton h-7 w-1/2" />
@@ -115,7 +115,7 @@ export default function ProfileDetailPage() {
   const photos = [p.profilePhoto, ...p.additionalPhotos];
   const edu = educations.find(([v]) => v === p.education);
   const Item = ({ label, value }: { label: string; value: string }) => (
-    <div className="rounded-xl bg-muted p-3">
+    <div className="rounded-xl border border-[#f0e2c4] bg-[#fbf3e3] p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
     </div>
@@ -133,7 +133,7 @@ export default function ProfileDetailPage() {
         </button>
       </div>
 
-      <div className="animate-fade-in overflow-hidden rounded-[18px] bg-white shadow-[0_4px_16px_rgba(120,80,20,.08)]">
+      <div className="animate-fade-in overflow-hidden panel">
         <div className="relative aspect-4/5 bg-muted">
           <Image key={photos[photo]} src={photos[photo]} alt={p.fullName} fill sizes="(max-width: 448px) 100vw, 448px" className="animate-fade-in object-cover" />
         </div>

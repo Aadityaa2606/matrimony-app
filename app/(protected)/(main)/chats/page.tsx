@@ -81,7 +81,7 @@ export default function ChatsPage() {
         <div className="skeleton mb-5 h-4 w-56" />
         <div className="space-y-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-3 rounded-[18px] border border-border bg-white p-3">
+            <div key={i} className="flex items-center gap-3 panel p-3">
               <div className="skeleton h-14 w-14 shrink-0 rounded-full" />
               <div className="flex-1 space-y-2">
                 <div className="skeleton h-4 w-1/2" />
@@ -160,7 +160,7 @@ function ChannelPreview({
   return (
     <button
       onClick={onClick}
-      className="animate-fade-in flex min-h-16 w-full items-center gap-3 rounded-[18px] border border-border bg-white p-3 text-left shadow-sm transition hover:border-accent hover:shadow-md active:scale-[.99]"
+      className="animate-fade-in flex min-h-16 w-full items-center gap-3 panel p-3 text-left transition hover:border-accent hover:shadow-md active:scale-[.99]"
     >
       {/* Avatar */}
       <div className="relative shrink-0">

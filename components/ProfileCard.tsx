@@ -19,7 +19,7 @@ export type ProfileCardData = {
 export function ProfileCard({ p, children }: { p: ProfileCardData; children: React.ReactNode }) {
   const { t } = useT();
   return (
-    <div className="animate-fade-in overflow-hidden rounded-[18px] bg-white shadow-[0_4px_16px_rgba(120,80,20,.08)] transition-shadow duration-300 hover:shadow-[0_10px_30px_rgba(120,80,20,.14)]">
+    <div className="animate-fade-in overflow-hidden panel transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(120,80,20,.14)]">
       <Link href={`/profile/${p.id}`} className="group block">
         <div className="relative aspect-4/5 overflow-hidden bg-muted">
           <Image
@@ -33,7 +33,7 @@ export function ProfileCard({ p, children }: { p: ProfileCardData; children: Rea
         </div>
         <div className="p-4 pb-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-serif text-xl font-bold">
+            <h3 className="font-serif text-xl font-bold text-primary-dark">
               {p.fullName}, {p.age}
             </h3>
             <span className="shrink-0 rounded-full bg-[#e6f2e8] px-2.5 py-1 text-xs font-bold text-success">
@@ -56,7 +56,7 @@ export function ProfileCard({ p, children }: { p: ProfileCardData; children: Rea
 // Placeholder with the same shape as ProfileCard while a list loads.
 export function ProfileCardSkeleton() {
   return (
-    <div aria-hidden className="overflow-hidden rounded-[18px] bg-white shadow-[0_4px_16px_rgba(120,80,20,.08)]">
+    <div aria-hidden className="overflow-hidden panel">
       <div className="skeleton aspect-4/5 rounded-none" />
       <div className="space-y-2.5 p-4 pb-2">
         <div className="skeleton h-6 w-2/3" />

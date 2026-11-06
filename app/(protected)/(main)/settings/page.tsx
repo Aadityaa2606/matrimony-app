@@ -12,7 +12,7 @@ import type { DictKey } from "@/lib/i18n/dict";
 type Me = { fullName: string; profilePhoto: string; location: string; community: string };
 type Blocked = { userId: string; name: string; photo: string | null };
 
-const card = "rounded-[18px] bg-white p-4 shadow-[0_4px_16px_rgba(120,80,20,.08)]";
+const card = "panel p-4";
 
 export default function SettingsPage() {
   const { t, lang } = useT();

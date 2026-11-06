@@ -145,7 +145,7 @@ export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boole
   );
   const choice = (on: boolean) =>
     `min-h-[56px] rounded-xl border-2 p-3 text-lg font-semibold transition-all ${
-      on ? "border-primary bg-primary/10" : "border-border"
+      on ? "border-primary bg-linear-to-b from-primary-light to-primary-dark text-white shadow-[0_4px_12px_rgba(142,27,44,.25)]" : "border-border bg-white hover:border-accent"
     }`;
   const removeBtn = (onClick: () => void) => (
     <button type="button" aria-label={t("reg.photo.remove")} onClick={onClick}
@@ -154,7 +154,7 @@ export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boole
     </button>
   );
   const picker = (main: boolean, cls: string) => (
-    <label className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border p-1 text-center text-sm text-muted-foreground ${cls}`}>
+    <label className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-accent/60 bg-[#fdf6e7] p-1 transition-colors hover:border-primary text-center text-sm text-muted-foreground ${cls}`}>
       <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" disabled={uploading}
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -168,21 +168,35 @@ export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boole
   const Wrap = edit ? "div" : OutsideScreen;
   return (
     <Wrap>
-      <h1 className="font-serif text-2xl font-bold text-primary">{t(edit ? "edit.title" : "reg.title")}</h1>
-      <p className="mb-4 text-muted-foreground">{t("reg.step", { n: step, total: TOTAL })}</p>
+      <h1 className="text-center font-serif text-2xl font-bold text-primary">{t(edit ? "edit.title" : "reg.title")}</h1>
 
-      <div className="mb-6">
-        <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={1} aria-valuemax={TOTAL} aria-valuenow={step}>
-          <div className="h-full bg-primary transition-all" style={{ width: `${(step / TOTAL) * 100}%` }} />
-        </div>
-        <div className="flex justify-between text-xs text-muted-foreground">
-          {stepKeys.map((k, i) => (
-            <span key={k} className={i + 1 === step ? "font-bold text-primary" : ""}>{t(k)}</span>
-          ))}
-        </div>
-      </div>
+      <ol aria-label={t("reg.step", { n: step, total: TOTAL })} className="mb-6 mt-5 grid grid-cols-4">
+        {stepKeys.map((k, i) => {
+          const n = i + 1;
+          const done = n < step;
+          const cur = n === step;
+          return (
+            <li key={k} aria-current={cur ? "step" : undefined} className="relative flex flex-col items-center gap-1.5 text-center">
+              {n > 1 && <span aria-hidden className={`absolute right-1/2 top-4 h-0.5 w-full -translate-y-1/2 ${n <= step ? "bg-primary" : "bg-border"}`} />}
+              <span
+                className={`relative z-10 flex size-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                  done ? "bg-primary text-white" : cur ? "bg-primary text-white ring-4 ring-accent/40" : "border-2 border-border bg-surface text-muted-foreground"
+                }`}
+              >
+                {done ? (
+                  <svg aria-hidden className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                ) : n}
+              </span>
+              <span className={`text-xs ${cur ? "font-bold text-primary" : "text-muted-foreground"}`}>{t(k)}</span>
+            </li>
+          );
+        })}
+      </ol>
 
       <div className="card space-y-4">
+        <h2 className="border-b border-[#ecdcb9] pb-3 font-serif text-xl font-bold text-primary">
+          {step}. {t(stepKeys[step - 1])}
+        </h2>
         {step === 1 && (
           <>
             <div>
@@ -268,7 +282,7 @@ export function RegisterClient({ initial, edit }: { initial?: Form; edit?: boole
             <div>
               <Label k="reg.parent" />
               <div className="flex items-stretch gap-2">
-                <span className="flex min-h-[52px] items-center rounded-xl border-2 border-border bg-muted px-3 font-semibold">+91</span>
+                <span className="flex min-h-[52px] items-center rounded-xl border-[1.5px] border-border bg-muted px-3 font-semibold">+91</span>
                 <input type="tel" inputMode="numeric" className="input min-w-0 flex-1" placeholder="98765 43210"
                   value={f.parentContact}
                   onChange={(e) => set("parentContact", digits(e.target.value).slice(0, 10))} />

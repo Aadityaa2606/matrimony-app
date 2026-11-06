@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Brand } from "@/components/Brand";
-import { Garland } from "@/components/Garland";
 import { LangToggle } from "@/components/LangToggle";
 import { useT } from "@/components/LanguageProvider";
 import type { DictKey } from "@/lib/i18n/dict";
@@ -31,16 +30,17 @@ export default function MainShell({
 
   return (
     <div className="min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md">
-        <Garland variant="thin" />
-        <div className="relative mx-auto flex max-w-2xl items-center justify-between px-4 pb-2 pt-3">
+      <header className="band sticky top-0 z-30 mb-4 rounded-b-3xl">
+        <div className="relative mx-auto flex max-w-2xl items-center justify-center px-4 py-2.5">
           <Brand size="sm" />
-          <LangToggle />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <LangToggle onDark />
+          </div>
         </div>
       </header>
 
       {daysLeft > 0 && daysLeft <= 7 && (
-        <div className="relative mx-4 mb-2 flex max-w-2xl items-center justify-between gap-3 rounded-[18px] bg-accent/20 px-4 py-2 sm:mx-auto">
+        <div className="relative mx-4 mb-2 flex max-w-2xl items-center justify-between gap-3 rounded-[18px] border border-accent/50 bg-[#fbf0d9] px-4 py-2 sm:mx-auto">
           <span className="font-semibold">{t(daysLeft === 1 ? "banner.day" : "banner.days", { n: daysLeft })}</span>
           <Link href="/payment" className="btn btn-primary min-h-12 px-4 py-2">
             {t("banner.renew")}
@@ -50,7 +50,7 @@ export default function MainShell({
 
       {children}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(120,80,20,.06)] backdrop-blur-md">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-accent/40 bg-[#fffdf8]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(120,80,20,.06)] backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-2xl items-stretch justify-around px-2">
           {navItems.map((item) => {
             const active = pathname.startsWith(item.href);
@@ -65,10 +65,10 @@ export default function MainShell({
               >
                 <span
                   className={`flex h-8 w-14 items-center justify-center rounded-full transition-all duration-200 ${
-                    active ? "bg-accent/20" : "group-active:scale-90"
+                    active ? "bg-linear-to-b from-primary-light to-primary-dark text-[#fdf6e7] shadow-[0_3px_10px_rgba(142,27,44,.3)]" : "group-active:scale-90"
                   }`}
                 >
-                  <svg className="h-6 w-6" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.12 : 0} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-6 w-6" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.18 : 0} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={item.d} />
                   </svg>
                 </span>

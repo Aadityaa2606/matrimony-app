@@ -3,7 +3,7 @@
 export function PhoneInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex items-stretch gap-2">
-      <span className="flex min-h-[52px] items-center rounded-xl border-2 border-border bg-muted px-3 font-semibold">+91</span>
+      <span className="flex min-h-[52px] items-center rounded-xl border-[1.5px] border-border bg-muted px-3 font-semibold">+91</span>
       <input
         type="tel"
         inputMode="tel"

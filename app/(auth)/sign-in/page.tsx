@@ -41,7 +41,7 @@ export default function SignInPage() {
   return (
     <OutsideScreen>
       <h1 className="mb-6 text-center font-serif text-2xl font-bold text-primary">{t("signin.title")}</h1>
-      <form onSubmit={submit} className="flex flex-col gap-4">
+      <form onSubmit={submit} className="panel flex flex-col gap-4 p-5">
         <label className="flex flex-col gap-2 font-semibold">
           {t("signup.phone")}
           <PhoneInput value={phone} onChange={setPhone} />

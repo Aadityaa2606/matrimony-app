@@ -14,7 +14,7 @@ export function AccountStatusClient({ status }: { status: "REJECTED" | "SUSPENDE
         <h1 className="font-serif text-2xl font-bold text-primary">{t(`status.${k}.title`)}</h1>
         <p className="text-lg leading-relaxed text-muted-foreground">{t(`status.${k}.body`)}</p>
         <SupportLine />
-        <button type="button" onClick={() => signOut({ callbackUrl: "/welcome" })} className="btn mt-2 w-full border-2 border-accent text-primary">
+        <button type="button" onClick={() => signOut({ callbackUrl: "/welcome" })} className="btn btn-outline mt-2 w-full">
           {t("common.signOut")}
         </button>
       </div>
