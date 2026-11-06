@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { OutsideScreen } from "@/components/OutsideScreen";
+import { Corners, GoldDivider } from "@/components/Ornaments";
 import { PhoneInput } from "@/components/PhoneInput";
 import { PasswordInput } from "@/components/PasswordInput";
 import { useT } from "@/components/LanguageProvider";
@@ -52,8 +53,10 @@ export default function SignUpPage() {
 
   return (
     <OutsideScreen>
-      <h1 className="mb-6 text-center font-serif text-2xl font-bold text-primary">{t("signup.title")}</h1>
-      <form onSubmit={submit} className="panel flex flex-col gap-4 p-5">
+      <h1 className="text-center font-serif text-2xl font-bold text-primary">{t("signup.title")}</h1>
+      <GoldDivider className="mb-5 mt-2" />
+      <form onSubmit={submit} className="panel relative flex flex-col gap-4 px-6 py-7">
+        <Corners />
         <label className="flex flex-col gap-2 font-semibold">
           {t("signup.name")}
           <input className="input font-normal" value={name} maxLength={60} autoComplete="name" onChange={(e) => setName(e.target.value)} />

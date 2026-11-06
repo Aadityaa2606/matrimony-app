@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { OutsideScreen } from "@/components/OutsideScreen";
-import { GoldDivider } from "@/components/Ornaments";
+import { GoldDivider, Medallion } from "@/components/Ornaments";
 import { useT } from "@/components/LanguageProvider";
 
 const BADGES = [
@@ -20,11 +20,7 @@ export default function WelcomePage() {
         <div className="grid w-full grid-cols-2 gap-4">
           {BADGES.map(({ k, d }) => (
             <div key={k} className="flex flex-col items-center gap-2">
-              <span className="flex size-20 items-center justify-center rounded-full border border-accent/60 bg-[radial-gradient(circle,#fffdf8_55%,#f6ead0)] text-primary shadow-[0_4px_14px_rgba(120,80,20,.12)]">
-                <svg className="size-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
-                  <path d={d} />
-                </svg>
-              </span>
+              <Medallion d={d} />
               <span className="text-sm font-semibold">{t(k)}</span>
             </div>
           ))}

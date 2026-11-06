@@ -3,13 +3,14 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { OutsideScreen } from "@/components/OutsideScreen";
+import { GoldDivider, Medallion } from "@/components/Ornaments";
 import { useT } from "@/components/LanguageProvider";
 
 const SLIDES = [
-  { icon: "✓", title: "feat.1.title", body: "feat.1.body" },
-  { icon: "🔒", title: "feat.2.title", body: "feat.2.body" },
-  { icon: "❀", title: "feat.3.title", body: "feat.3.body" },
-  { icon: "₹", title: "feat.4.title", body: "feat.4.body" },
+  { d: "M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z M9 12l2 2 4-4", title: "feat.1.title", body: "feat.1.body" },
+  { d: "M7 11V8a5 5 0 0110 0v3M5 11h14v10H5z M12 15v2", title: "feat.2.title", body: "feat.2.body" },
+  { d: "M12 20c-4 0-8-3-9-8 4 0 7 2 9 8zm0 0c4 0 8-3 9-8-4 0-7 2-9 8zm0 0c-2.5-3-2.5-10 0-14 2.5 4 2.5 11 0 14z", title: "feat.3.title", body: "feat.3.body" },
+  { d: "M7 5h10M7 9h10M8 5c5.5 0 5.5 8 0 8H7l7 7", title: "feat.4.title", body: "feat.4.body" },
 ] as const;
 
 export function FeaturesCarousel({ amount }: { amount: number }) {
@@ -29,10 +30,9 @@ export function FeaturesCarousel({ amount }: { amount: number }) {
       >
         {SLIDES.map((s) => (
           <section key={s.title} className="flex w-full shrink-0 snap-center flex-col items-center gap-4 px-2 py-6 text-center">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-accent/60 bg-[radial-gradient(circle,#fffdf8_55%,#f6ead0)] text-4xl text-primary shadow-[0_4px_14px_rgba(120,80,20,.12)]">
-              {s.icon}
-            </div>
+            <Medallion d={s.d} className="size-28" />
             <h1 className="font-serif text-2xl font-bold text-primary">{t(s.title, { amount })}</h1>
+            <GoldDivider />
             <p className="text-lg leading-relaxed text-muted-foreground">{t(s.body)}</p>
           </section>
         ))}
