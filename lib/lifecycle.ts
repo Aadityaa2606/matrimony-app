@@ -30,8 +30,10 @@ export function afterPayment(u: LifecycleUser, now: Date): Change {
   return { status: u.status };
 }
 
+// New members fill in details first, then pay. Members who paid before entering details go straight to review.
 export function afterProfileSaved(u: LifecycleUser): Change {
-  return { status: u.status === "PENDING_PROFILE" ? "PENDING_REVIEW" : u.status };
+  if (u.status !== "PENDING_PROFILE") return { status: u.status };
+  return { status: u.hasPaid ? "PENDING_REVIEW" : "PENDING_PAYMENT" };
 }
 
 function need(ok: boolean, msg: string): void {

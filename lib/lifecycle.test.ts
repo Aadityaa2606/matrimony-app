@@ -37,8 +37,12 @@ describe("afterPayment", () => {
 });
 
 describe("afterProfileSaved", () => {
-  it("advances only PENDING_PROFILE", () => {
-    expect(afterProfileSaved(u({ status: "PENDING_PROFILE" })).status).toBe("PENDING_REVIEW");
+  it("sends unpaid new members to payment, paid ones to review", () => {
+    expect(afterProfileSaved(u({ status: "PENDING_PROFILE" })).status).toBe("PENDING_PAYMENT");
+    expect(afterProfileSaved(u({ status: "PENDING_PROFILE", hasPaid: true })).status).toBe("PENDING_REVIEW");
+  });
+  it("leaves other states alone", () => {
+    expect(afterProfileSaved(u({ status: "PENDING_PAYMENT", hasProfile: true })).status).toBe("PENDING_PAYMENT");
     expect(afterProfileSaved(u({ status: "ACTIVE" })).status).toBe("ACTIVE");
   });
 });

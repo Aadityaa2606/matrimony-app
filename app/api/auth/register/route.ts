@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       phoneNumber: phone,
       displayName: name,
       passwordHash: await bcrypt.hash(password, 12),
+      status: "PENDING_PROFILE", // details first, then payment
     },
   });
   return NextResponse.json({ ok: true }, { status: 201 });
