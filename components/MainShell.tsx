@@ -29,7 +29,7 @@ export default function MainShell({
   );
 
   return (
-    <div className="min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-dvh bg-background pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <header className="band sticky top-0 z-30 mb-4 rounded-b-3xl">
         <div className="relative mx-auto flex max-w-2xl items-center justify-center px-4 py-2.5">
           <Brand size="sm" />

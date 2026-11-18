@@ -56,6 +56,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-noto-sans), system-ui, sans-serif;
   min-height: 100vh;
+  /* dvh = the area the browser actually shows; 100vh on phones also counts the hidden-toolbar space. */
+  min-height: 100dvh;
 }
 
 /* Typography */
