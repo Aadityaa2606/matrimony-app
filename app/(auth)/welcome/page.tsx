@@ -14,18 +14,18 @@ export default function WelcomePage() {
   const { t } = useT();
   return (
     <OutsideScreen hero>
-      <div className="flex flex-col items-center gap-5 text-center">
-        <p className="font-serif text-xl font-bold leading-snug sm:text-2xl text-primary">{t("welcome.tagline")}</p>
-        <GoldDivider />
+      <div className="my-auto flex flex-col items-center gap-5 py-2 text-center short:gap-3">
+        <p className="font-serif text-xl font-bold leading-snug text-primary sm:text-2xl short:text-lg">{t("welcome.tagline")}</p>
+        <GoldDivider className="mini:hidden" />
         <div className="grid w-full grid-cols-2 gap-4">
           {BADGES.map(({ k, d }) => (
             <div key={k} className="flex flex-col items-center gap-2">
-              <Medallion d={d} />
+              <Medallion d={d} className="size-20 short:size-16 mini:size-12" />
               <span className="text-sm font-semibold">{t(k)}</span>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex w-full flex-col gap-3">
+        <div className="mt-4 flex w-full flex-col gap-3 short:mt-1">
           <Link href="/features" className="btn btn-primary btn-pill w-full">
             {t("welcome.getStarted")}
             <svg aria-hidden className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" /></svg>

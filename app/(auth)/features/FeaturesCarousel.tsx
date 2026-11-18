@@ -26,18 +26,18 @@ export function FeaturesCarousel({ amount }: { amount: number }) {
       <div
         ref={ref}
         onScroll={(e) => setI(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
-        className="mt-4 flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-4 flex shrink-0 snap-x short:mt-0 snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {SLIDES.map((s) => (
-          <section key={s.title} className="flex w-full shrink-0 snap-center flex-col items-center gap-4 px-2 py-6 text-center">
-            <Medallion d={s.d} className="size-28" />
-            <h1 className="font-serif text-2xl font-bold text-primary">{t(s.title, { amount })}</h1>
+          <section key={s.title} className="flex w-full shrink-0 snap-center flex-col items-center gap-4 px-2 py-6 text-center short:gap-2 short:py-2">
+            <Medallion d={s.d} className="size-28 short:size-20" />
+            <h1 className="font-serif text-2xl font-bold text-primary short:text-xl">{t(s.title, { amount })}</h1>
             <GoldDivider />
-            <p className="text-lg leading-relaxed text-muted-foreground">{t(s.body)}</p>
+            <p className="text-lg leading-relaxed text-muted-foreground short:text-base">{t(s.body)}</p>
           </section>
         ))}
       </div>
-      <div className="my-4 flex justify-center">
+      <div className="my-4 flex justify-center short:my-0">
         {SLIDES.map((s, n) => (
           <button
             key={s.title}

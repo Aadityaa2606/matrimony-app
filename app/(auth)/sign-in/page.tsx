@@ -41,15 +41,15 @@ export default function SignInPage() {
 
   return (
     <OutsideScreen>
-      <h1 className="text-center font-serif text-2xl font-bold text-primary">{t("signin.title")}</h1>
-      <GoldDivider className="mb-5 mt-2" />
-      <form onSubmit={submit} className="panel relative flex flex-col gap-4 px-6 py-7">
+      <h1 className="text-center font-serif text-2xl font-bold text-primary short:text-xl">{t("signin.title")}</h1>
+      <GoldDivider className="mb-5 mt-2 short:mb-3 short:mt-1 tiny:mb-2" />
+      <form onSubmit={submit} className="panel relative flex flex-col gap-4 px-6 py-7 short:gap-3 short:py-5 tiny:gap-2 tiny:py-4">
         <Corners />
-        <label className="flex flex-col gap-2 font-semibold">
+        <label className="flex flex-col gap-2 font-semibold tiny:gap-1">
           {t("signup.phone")}
           <PhoneInput value={phone} onChange={setPhone} />
         </label>
-        <label className="flex flex-col gap-2 font-semibold">
+        <label className="flex flex-col gap-2 font-semibold tiny:gap-1">
           {t("signin.password")}
           <PasswordInput value={password} onChange={setPassword} autoComplete="current-password" />
         </label>
@@ -62,7 +62,7 @@ export default function SignInPage() {
           {t("signin.submit")}
         </button>
       </form>
-      <div className="mt-6 flex flex-col items-center gap-1 text-center">
+      <div className="mt-6 flex flex-col items-center gap-1 text-center short:mt-3">
         <span>{t("signin.forgot")}</span>
         <SupportLine label={t("common.callUs")} />
         <Link href="/sign-up" className="mt-2 inline-flex min-h-12 items-center font-semibold text-primary underline">

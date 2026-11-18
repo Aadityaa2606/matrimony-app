@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Phones once the browser bars take their share: compact the onboarding ornaments. */
+@custom-variant short (@media (max-height: 1000px));
+@custom-variant tiny (@media (max-height: 780px));
+@custom-variant mini (@media (max-height: 640px));
+
 :root {
   --background: #fcf8f0;
   --background-secondary: #f4ecdc;
@@ -47,7 +52,7 @@
 }
 
 body {
-  background: radial-gradient(120% 60% at 50% 0%, #fffaf1 0%, var(--background) 60%) fixed, var(--background);
+  background: radial-gradient(120% 60% at 50% 0%, #fffaf1 0%, var(--background) 60%) no-repeat, var(--background);
   color: var(--foreground);
   font-family: var(--font-noto-sans), system-ui, sans-serif;
   min-height: 100vh;
@@ -279,6 +284,11 @@ body {
 }
 
 /* Onboarding: ornate page frame (gold border + offset gold outline) on a faint gold lattice. */
+/* Onboarding pages never scroll as a whole, so stop the rubber-band bounce too. */
+html:has(.frame-page) {
+  overscroll-behavior: none;
+}
+
 .frame-page {
   background:
     radial-gradient(circle at 1px 1px, rgba(201, 162, 74, 0.18) 1px, transparent 0) 0 0 / 16px 16px,

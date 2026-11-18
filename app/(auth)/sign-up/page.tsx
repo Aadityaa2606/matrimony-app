@@ -53,19 +53,19 @@ export default function SignUpPage() {
 
   return (
     <OutsideScreen>
-      <h1 className="text-center font-serif text-2xl font-bold text-primary">{t("signup.title")}</h1>
-      <GoldDivider className="mb-5 mt-2" />
-      <form onSubmit={submit} className="panel relative flex flex-col gap-4 px-6 py-7">
+      <h1 className="text-center font-serif text-2xl font-bold text-primary short:text-xl">{t("signup.title")}</h1>
+      <GoldDivider className="mb-5 mt-2 short:mb-3 short:mt-1 tiny:mb-2" />
+      <form onSubmit={submit} className="panel relative flex flex-col gap-4 px-6 py-7 short:gap-3 short:py-5 tiny:gap-2 tiny:py-4">
         <Corners />
-        <label className="flex flex-col gap-2 font-semibold">
+        <label className="flex flex-col gap-2 font-semibold tiny:gap-1">
           {t("signup.name")}
           <input className="input font-normal" value={name} maxLength={60} autoComplete="name" onChange={(e) => setName(e.target.value)} />
         </label>
-        <label className="flex flex-col gap-2 font-semibold">
+        <label className="flex flex-col gap-2 font-semibold tiny:gap-1">
           {t("signup.phone")}
           <PhoneInput value={phone} onChange={setPhone} />
         </label>
-        <label className="flex flex-col gap-2 font-semibold">
+        <label className="flex flex-col gap-2 font-semibold tiny:gap-1">
           {t("signup.password")}
           <PasswordInput value={password} onChange={setPassword} autoComplete="new-password" />
         </label>
@@ -83,7 +83,7 @@ export default function SignUpPage() {
           {t("signup.submit")}
         </button>
       </form>
-      <p className="mt-6 text-center">
+      <p className="mt-6 text-center short:mt-3 tiny:mt-2">
         {t("signup.haveAccount")}{" "}
         <Link href="/sign-in" className="font-semibold text-primary underline">
           {t("welcome.signIn")}
